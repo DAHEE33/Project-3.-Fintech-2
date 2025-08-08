@@ -63,6 +63,40 @@ public class AccountService {
         }
     }
 
+    public ResponseEntity<?> getMyAccount(UserPrincipal userPrincipal) {
+        try {
+            String accountNumber = userPrincipal.getAccountNumber();
+            if (accountNumber == null) {
+                throw new AccountNotFoundException("사용자의 계좌번호를 찾을 수 없습니다");
+            }
+
+            // BalanceService를 통해 잔액 조회
+            BigDecimal balance = balanceService.getBalance(accountNumber);
+            
+            // 프론트엔드에서 예상하는 형태로 응답 구성
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("accountNumber", accountNumber);
+            resp.put("balance", balance);
+            resp.put("bank", "EasyPay"); // 고정값
+            resp.put("currency", "KRW");
+            resp.put("userId", userPrincipal.getId());
+            resp.put("userName", userPrincipal.getUsername()); // phoneNumber
+
+            auditLogService.logSuccess("MY_ACCOUNT_INQUIRY", "ACCOUNT", accountNumber, "내 계좌 정보 조회 성공", resp);
+            return ResponseEntity.ok(resp);
+
+        } catch (AccountNotFoundException e) {
+            auditLogService.logError(userPrincipal.getId(), "MY_ACCOUNT_INQUIRY", "ACCOUNT", userPrincipal.getAccountNumber(), 
+                    "계좌 정보 조회 실패: " + e.getMessage());
+            return ResponseEntity.status(404).body(Map.of("error", "ACCOUNT_NOT_FOUND", "message", e.getMessage()));
+        } catch (Exception e) {
+            log.error("내 계좌 정보 조회 중 오류 발생", e);
+            auditLogService.logError(userPrincipal.getId(), "MY_ACCOUNT_INQUIRY", "ACCOUNT", userPrincipal.getAccountNumber(), 
+                    "계좌 정보 조회 오류: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "INTERNAL_ERROR", "message", "내부 서버 오류"));
+        }
+    }
+
     public ResponseEntity<?> getMyBalance(UserPrincipal userPrincipal) {
         try {
             String accountNumber = userPrincipal.getAccountNumber();

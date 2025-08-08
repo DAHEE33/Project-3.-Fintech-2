@@ -480,6 +480,13 @@
                 <div class="settings-icon" onclick="toggleSettings()">
                     ⚙️
                     <div class="settings-dropdown" id="settingsDropdown">
+                        <div class="settings-menu-item" onclick="openAccountManagement()">
+                            <span class="icon">💳</span>
+                            <div>
+                                <div class="text">계좌 관리</div>
+                                <div class="description">계좌 생성 및 외부 계좌 연결</div>
+                            </div>
+                        </div>
                         <div class="settings-menu-item" onclick="openPinSettings()">
                             <span class="icon">🔐</span>
                             <div>
@@ -726,6 +733,13 @@
         let currentPinMode = 'register'; // 'register' 또는 'change'
         let userPinStatus = null;
 
+        // 계좌 관리 페이지 열기
+        function openAccountManagement() {
+            console.log('계좌 관리 페이지 열기');
+            document.getElementById('settingsDropdown').classList.remove('show');
+            window.location.href = '/account-management.html';
+        }
+
         // PIN 설정 열기
         async function openPinSettings() {
             console.log('PIN 설정 열기 시작');
@@ -756,7 +770,7 @@
             
             try {
                 console.log('PIN 상태 API 호출');
-                const response = await fetch('/pin/status', {
+                const response = await fetch('/api/pin/status', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -902,7 +916,7 @@
             
             try {
                 console.log('PIN 등록 API 호출 시작');
-                const response = await fetch('/pin/register', {
+                const response = await fetch('/api/pin/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -951,7 +965,7 @@
             const token = localStorage.getItem('accessToken');
             
             try {
-                const response = await fetch('/pin/change', {
+                const response = await fetch('/api/pin/change', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1100,7 +1114,7 @@
             const token = localStorage.getItem('accessToken');
             
             try {
-                const response = await fetch('/auth/verify-password', {
+                const response = await fetch('/api/auth/verify-password', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1135,7 +1149,7 @@
             const token = localStorage.getItem('accessToken');
             
             try {
-                const response = await fetch('/auth/profile', {
+                const response = await fetch('/api/auth/profile', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -1242,7 +1256,7 @@
             console.log('전송할 데이터:', profileData);
 
             try {
-                const response = await fetch('/auth/profile', {
+                const response = await fetch('/api/auth/profile', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1404,7 +1418,7 @@
             
             console.log('API 호출 시작: /auth/check-pin-required');
             
-            fetch('/auth/check-pin-required', {
+            fetch('/api/auth/check-pin-required', {
                 method: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -1550,7 +1564,7 @@
             
             // 중복 검사
             try {
-                const response = await fetch(`/auth/check-email?email=${encodeURIComponent(email)}`, {
+                const response = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'

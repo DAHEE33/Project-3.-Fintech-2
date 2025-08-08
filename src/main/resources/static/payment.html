@@ -396,7 +396,7 @@
             const token = localStorage.getItem('accessToken');
             
             try {
-                const response = await fetch('/accounts/balance', {
+                const response = await fetch('/api/accounts', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -533,7 +533,7 @@
                 
                 console.log('결제 요청 데이터:', paymentData);
                 
-                const response = await fetch('/payments', {
+                const response = await fetch('/api/payments', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

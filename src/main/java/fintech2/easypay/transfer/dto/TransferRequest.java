@@ -23,4 +23,7 @@ public class TransferRequest {
     
     @Size(max = 100, message = "메모는 100자 이하여야 합니다.")
     private String memo;
+    
+    // 송금자 계좌번호 (선택한 계좌로 송금하기 위해 추가)
+    private String senderAccountNumber;
 }

@@ -3,9 +3,11 @@ package fintech2.easypay.account.service;
 import fintech2.easypay.account.entity.Account;
 import fintech2.easypay.account.entity.AccountBalance;
 import fintech2.easypay.account.entity.TransactionHistory;
+import fintech2.easypay.account.entity.UserAccount;
 import fintech2.easypay.account.repository.AccountBalanceRepository;
 import fintech2.easypay.account.repository.AccountRepository;
 import fintech2.easypay.account.repository.TransactionHistoryRepository;
+import fintech2.easypay.account.repository.UserAccountRepository;
 import fintech2.easypay.audit.service.AlarmService;
 import fintech2.easypay.common.enums.TransactionStatus;
 import fintech2.easypay.common.enums.TransactionType;
@@ -34,6 +36,7 @@ public class BalanceService {
     private final AccountBalanceRepository accountBalanceRepository;
     private final AccountRepository accountRepository;
     private final TransactionHistoryRepository transactionHistoryRepository;
+    private final UserAccountRepository userAccountRepository;
     private final AlarmService alarmService;
 
     /**
@@ -111,6 +114,14 @@ public class BalanceService {
                     account.setBalance(balanceAfter);
                     accountRepository.save(account);
                     log.debug("Account 엔티티 잔액도 동기화: {} -> {}", balanceBefore, balanceAfter);
+                });
+        
+        // UserAccount 엔티티도 동일하게 업데이트 (프론트엔드 호환성을 위해)
+        userAccountRepository.findByAccountNumber(accountNumber)
+                .ifPresent(userAccount -> {
+                    userAccount.setBalance(balanceAfter);
+                    userAccountRepository.save(userAccount);
+                    log.debug("UserAccount 엔티티 잔액도 동기화: {} -> {}", balanceBefore, balanceAfter);
                 });
 
         // 거래 내역 기록

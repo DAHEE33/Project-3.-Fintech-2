@@ -15,7 +15,7 @@ let clientConfig = {
  */
 async function loadClientConfig() {
     try {
-        const response = await fetch('/auth/client-config');
+        const response = await fetch('/api/auth/client-config');
         if (response.ok) {
             const config = await response.json();
             clientConfig = {
@@ -112,7 +112,7 @@ async function logout() {
         localStorage.removeItem('userPhone');
         
         // 서버에 로그아웃 요청
-        const response = await fetch('/auth/logout', {
+        const response = await fetch('/api/auth/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -206,7 +206,7 @@ async function refreshToken() {
     try {
         console.log('🔄 === Refresh Token으로 토큰 갱신 시도 ===');
         
-        const response = await fetch('/auth/refresh', {
+        const response = await fetch('/api/auth/refresh', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

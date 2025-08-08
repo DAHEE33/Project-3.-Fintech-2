@@ -163,10 +163,12 @@ public class AuthService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of("error", "INVALID_PHONE", "message", "휴대폰 번호 형식이 올바르지 않습니다"));
             }
-            // 7. 비밀번호 암호화
+            // 7. 비밀번호 암호화 (BCrypt 자동 salt 포함)
             String encoded = passwordEncoder.encode(req.getPassword());
+            
             // 8. 가상계좌번호 생성
             String accountNumber = generateAccountNumber();
+            
             // 9. User 저장 (핸드폰 번호에서 하이픈 제거)
             User user = new User();
             user.setPhoneNumber(req.getPhoneNumber().replace("-", ""));
@@ -239,7 +241,7 @@ public class AuthService {
                         .body(Map.of("error", "ACCOUNT_LOCKED", "message", "계정이 잠겨있습니다"));
             }
             
-            // 비밀번호 검증
+            // 비밀번호 검증 (BCrypt 자동 salt 검증)
             if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
                 // 로그인 실패 처리
                 user.incrementLoginFailCount();
@@ -501,6 +503,7 @@ public class AuthService {
             
             User user = userOpt.get();
             
+            // 비밀번호 확인 (BCrypt 자동 salt 검증)
             if (passwordEncoder.matches(req.getPassword(), user.getPassword())) {
                 log.info("비밀번호 확인 성공");
                 return ResponseEntity.ok(Map.of("success", true, "message", "비밀번호가 확인되었습니다"));

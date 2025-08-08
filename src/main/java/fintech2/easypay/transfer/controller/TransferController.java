@@ -19,6 +19,7 @@ import fintech2.easypay.auth.service.PinService;
 import fintech2.easypay.common.ApiResponse;
 import fintech2.easypay.common.BusinessException;
 import fintech2.easypay.common.ErrorCode;
+import fintech2.easypay.transfer.dto.RecentTransferResponse;
 import fintech2.easypay.transfer.dto.SecureTransferRequest;
 import fintech2.easypay.transfer.dto.TransferRequest;
 import fintech2.easypay.transfer.dto.TransferResponse;
@@ -30,7 +31,7 @@ import fintech2.easypay.transfer.service.TransferService;
  * JWT 토큰 기반 인증을 통한 보안 및 사용자 식별
  */
 @RestController
-@RequestMapping("/transfers")
+@RequestMapping("/api/transfers")
 @RequiredArgsConstructor
 @Tag(name = "송금 관리", description = "송금 및 거래 내역 관리 API")
 public class TransferController {
@@ -119,6 +120,16 @@ public class TransferController {
         Pageable pageable) {
         Page<TransferResponse> response = 
             transferService.getReceivedTransfers(userDetails.getUsername(), pageable);
+        return ApiResponse.success(response);
+    }
+    
+    @GetMapping("/recent")
+    @Operation(summary = "최근 송금 대상 조회", description = "최근 송금한 사람들의 목록 조회 (중복 제거)")
+    public ApiResponse<Page<RecentTransferResponse>> getRecentTransfers(
+        @AuthenticationPrincipal UserPrincipal userDetails,
+        Pageable pageable) {
+        Page<RecentTransferResponse> response = 
+            transferService.getRecentTransfers(userDetails.getUsername(), pageable);
         return ApiResponse.success(response);
     }
 }

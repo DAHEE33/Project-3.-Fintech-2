@@ -36,24 +36,30 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 // 인증 불필요 (Public)
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll() // API 접두사 포함
+                .requestMatchers("/auth/**").permitAll() // 기존 경로도 유지 (호환성)
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll() // 헬스체크 엔드포인트 추가
-                .requestMatchers("/accounts/test-balance/**").permitAll() // 테스트 엔드포인트
+                .requestMatchers("/api/accounts/test-balance/**").permitAll() // 테스트 엔드포인트
                 // 정적 리소스 허용
                 .requestMatchers("/static/**").permitAll()
                 .requestMatchers("/js/**").permitAll()
                 .requestMatchers("/css/**").permitAll()
                 .requestMatchers("/favicon.ico").permitAll()
-                .requestMatchers("/", "/index.html", "/register.html", "/login.html", "/main.html", "/balance.html", "/alarm.html", "/transfer.html", "/payment.html").permitAll()
+                .requestMatchers("/", "/index.html", "/register.html", "/login.html", "/main.html", "/balance.html", "/alarm.html", "/transfer.html", "/payment.html", "/account-management.html").permitAll()
                 // 계좌 관련 API (JWT 인증 필요)
-                .requestMatchers("/accounts/**").authenticated()
+                .requestMatchers("/api/accounts/**").authenticated()
+                .requestMatchers("/api/user-accounts/**").authenticated()
+                .requestMatchers("/api/external-accounts/**").authenticated()
+                .requestMatchers("/api/accounts/verify").authenticated()
                 // 결제 관련 API (JWT 인증 필요)
-                .requestMatchers("/payments/**").authenticated()
+                .requestMatchers("/api/payments/**").authenticated()
                 // 송금 관련 API (JWT 인증 필요)
-                .requestMatchers("/transfers/**").authenticated()
+                .requestMatchers("/api/transfers/**").authenticated()
+                // PIN 관련 API (JWT 인증 필요)
+                .requestMatchers("/api/pin/**").authenticated()
                 // 알림 관련 API (JWT 인증 필요)
-                .requestMatchers("/alarms/**").authenticated()
+                .requestMatchers("/api/alarms/**").authenticated()
                 // 나머지 모든 요청은 인증 필요
                 .anyRequest().authenticated()
             )
@@ -79,7 +85,9 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // BCrypt with strength 12 (2^12 = 4096 rounds)
+        // 기본값 10보다 강화된 보안, 하지만 성능과 균형
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean

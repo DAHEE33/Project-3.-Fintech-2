@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyPay - 계좌 관리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header-back {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .header-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        /* 탭 스타일 */
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 계좌 카드 스타일 */
+        .account-card {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .account-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .account-card.primary {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        }
+
+        .account-card.primary::before {
+            content: '기본 계좌';
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .account-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .account-number {
+            font-size: 14px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        .account-balance {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            text-align: right;
+        }
+
+        .account-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* 추가 버튼 */
+        .add-account-btn {
+            width: 100%;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            background: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .add-account-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f8f9ff;
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 90%;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .modal-btn-cancel {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .modal-btn-confirm {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 은행 선택 그리드 */
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bank-item {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .bank-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .bank-item.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        /* 외부 계좌 특별 스타일 */
+        .external-account-card {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .external-account-card .account-info h3::after {
+            content: '외부 계좌';
+            display: inline-block;
+            background: #17a2b8;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+
+        .verification-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .verification-status.verified {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .verification-status.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .verification-status.failed {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>계좌 관리</h1>
+            <button class="header-back" onclick="goBack()">⌂</button>
+        </header>
+        
+        <div class="content">
+            <!-- 탭 메뉴 -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('easypay')">내 EasyPay 계좌</button>
+                <button class="tab-button" onclick="switchTab('external')">외부 계좌</button>
+            </div>
+
+            <!-- EasyPay 계좌 탭 -->
+            <div class="tab-content active" id="easypay-tab">
+                <div class="section">
+                    <div class="section-title">EasyPay 계좌 목록</div>
+                    <div id="easypayAccountsList">
+                        <!-- 계좌 목록이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                    <button class="add-account-btn" onclick="openNewAccountModal()">
+                        <span>➕</span>
+                        새 EasyPay 계좌 만들기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 외부 계좌 탭 -->
+            <div class="tab-content" id="external-tab">
+                <div class="section">
+                    <div class="section-title">외부 계좌 목록</div>
+                    <div id="externalAccountsList">
+                        <!-- 외부 계좌 목록이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                    <button class="add-account-btn" onclick="openExternalAccountModal()">
+                        <span>🏦</span>
+                        외부 계좌 연결하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 커스텀 알림 모달 -->
+    <div class="modal-overlay" id="customAlertModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">알림</h3>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage" style="text-align: center; padding: 20px 0; line-height: 1.6;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-confirm" onclick="closeCustomAlert()">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 커스텀 확인 모달 -->
+    <div class="modal-overlay" id="customConfirmModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">확인</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage" style="text-align: center; padding: 20px 0; line-height: 1.6;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeCustomConfirm(false)">취소</button>
+                <button class="modal-btn modal-btn-confirm" onclick="closeCustomConfirm(true)">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 새 EasyPay 계좌 생성 모달 -->
+    <div class="modal-overlay" id="newAccountModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">새 EasyPay 계좌 만들기</h3>
+                <button class="modal-close" onclick="closeNewAccountModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">계좌 이름</label>
+                    <input type="text" class="form-input" id="newAccountName" 
+                           placeholder="예) 용돈계좌, 저축계좌" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN 번호 입력 (인증용)</label>
+                    <input type="password" class="form-input" id="newAccountPin" 
+                           placeholder="PIN 번호 6자리" maxlength="6">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeNewAccountModal()">취소</button>
+                <button class="modal-btn modal-btn-confirm" onclick="createNewAccount()">계좌 생성</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 외부 계좌 연결 모달 -->
+    <div class="modal-overlay" id="externalAccountModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">외부 계좌 연결</h3>
+                <button class="modal-close" onclick="closeExternalAccountModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">은행 선택</label>
+                    <div class="bank-grid" id="externalBankGrid">
+                        <!-- 은행 목록이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">계좌번호</label>
+                    <input type="text" class="form-input" id="externalAccountNumber" 
+                           placeholder="계좌번호를 입력하세요">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">계좌 별칭 (선택)</label>
+                    <input type="text" class="form-input" id="externalAccountAlias" 
+                           placeholder="예) 급여계좌, 적금통장" maxlength="50">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeExternalAccountModal()">취소</button>
+                <button class="modal-btn modal-btn-confirm" onclick="registerExternalAccount()">계좌 연결</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 계좌 수정 모달 -->
+    <div class="modal-overlay" id="editAccountModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="editModalTitle">계좌 수정</h3>
+                <button class="modal-close" onclick="closeEditAccountModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">계좌 이름/별칭</label>
+                    <input type="text" class="form-input" id="editAccountName" 
+                           placeholder="새로운 이름을 입력하세요" maxlength="50">
+                </div>
+                <input type="hidden" id="editAccountId">
+                <input type="hidden" id="editAccountNumber">
+                <input type="hidden" id="editAccountType">
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeEditAccountModal()">취소</button>
+                <button class="modal-btn modal-btn-confirm" onclick="updateAccountName()">수정</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let easypayAccounts = [];
+        let externalAccounts = [];
+        let selectedBankCode = '';
+        let selectedBankName = '';
+        
+        // 은행 코드 매핑
+        const bankCodeMap = {
+            'KB국민은행': '004',
+            '신한은행': '088',
+            '우리은행': '020',
+            '하나은행': '081',
+            '카카오뱅크': '090',
+            '토스뱅크': '092',
+            'IBK기업은행': '003',
+            'NH농협은행': '011',
+            'SC제일은행': '023',
+            '한국씨티은행': '027'
+        };
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('계좌 관리 페이지 로드 완료');
+            checkAuth();
+            loadEasyPayAccounts();
+            loadExternalAccounts();
+            initializeBankGrid();
+        });
+
+        // 계좌 잔액 업데이트 이벤트 리스너 추가
+        window.addEventListener('accountBalanceUpdated', function() {
+            console.log('계좌 잔액 업데이트 이벤트 수신, 계좌 목록 새로고침');
+            loadEasyPayAccounts();
+        });
+
+        // 인증 확인
+        function checkAuth() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                customAlert('로그인이 필요합니다.');
+                window.location.href = '/login.html';
+                return;
+            }
+        }
+
+        // 탭 전환
+        function switchTab(tabName) {
+            // 탭 버튼 상태 변경
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 탭 내용 변경
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            console.log('탭 전환:', tabName);
+        }
+
+        // EasyPay 계좌 목록 로드
+        async function loadEasyPayAccounts() {
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch('/api/user-accounts', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    easypayAccounts = result.accounts || [];
+                    renderEasyPayAccounts();
+                    console.log('EasyPay 계좌 목록 로드 완료:', easypayAccounts);
+                } else {
+                    console.error('EasyPay 계좌 목록 로드 실패:', response.status);
+                    easypayAccounts = [];
+                    renderEasyPayAccounts();
+                }
+            } catch (error) {
+                console.error('EasyPay 계좌 목록 로드 오류:', error);
+                easypayAccounts = [];
+                renderEasyPayAccounts();
+            }
+        }
+
+        // 외부 계좌 목록 로드
+        async function loadExternalAccounts() {
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch('/api/external-accounts', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    externalAccounts = result.accounts || [];
+                    renderExternalAccounts();
+                    console.log('외부 계좌 목록 로드 완료:', externalAccounts);
+                } else {
+                    console.error('외부 계좌 목록 로드 실패:', response.status);
+                    externalAccounts = [];
+                    renderExternalAccounts();
+                }
+            } catch (error) {
+                console.error('외부 계좌 목록 로드 오류:', error);
+                externalAccounts = [];
+                renderExternalAccounts();
+            }
+        }
+
+        // EasyPay 계좌 목록 렌더링
+        function renderEasyPayAccounts() {
+            const container = document.getElementById('easypayAccountsList');
+            
+            if (easypayAccounts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💳</div>
+                        <p>등록된 EasyPay 계좌가 없습니다.<br>새 계좌를 만들어 보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = easypayAccounts.map(account => `
+                <div class="account-card ${account.isPrimary ? 'primary' : ''}">
+                    <div class="account-header">
+                        <div class="account-info">
+                            <h3>${account.accountName}</h3>
+                            <div class="account-number">${account.accountNumber}</div>
+                        </div>
+                        <div class="account-balance">
+                            ${new Intl.NumberFormat('ko-KR').format(account.balance)}원
+                        </div>
+                    </div>
+                    <div class="account-actions">
+                        <button class="btn btn-secondary" onclick="editAccountName('${account.accountNumber}', '${account.accountName}', 'easypay')">
+                            이름 변경
+                        </button>
+                        ${!account.isPrimary ? `
+                            <button class="btn btn-secondary" onclick="setPrimaryAccount('${account.accountNumber}')">
+                                기본 계좌로 설정
+                            </button>
+                        ` : ''}
+                        ${!account.isPrimary && account.balance == 0 ? `
+                            <button class="btn btn-danger" onclick="deactivateAccount('${account.accountNumber}')">
+                                계좌 비활성화
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 외부 계좌 목록 렌더링
+        function renderExternalAccounts() {
+            const container = document.getElementById('externalAccountsList');
+            
+            if (externalAccounts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏦</div>
+                        <p>연결된 외부 계좌가 없습니다.<br>외부 계좌를 연결해 보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = externalAccounts.map(account => `
+                <div class="account-card external-account-card">
+                    <div class="account-header">
+                        <div class="account-info">
+                            <h3>${account.accountAlias || account.bankName + ' 계좌'}</h3>
+                            <div class="account-number">${account.bankName} ${account.accountNumber}</div>
+                            <div class="account-number">예금주: ${account.accountHolderName || '확인 중'}</div>
+                        </div>
+                    </div>
+                    <div class="verification-status ${account.verificationStatus.toLowerCase()}">
+                        ${getVerificationStatusText(account.verificationStatus)}
+                    </div>
+                    <div class="account-actions">
+                        <button class="btn btn-secondary" onclick="editAccountName('${account.id}', '${account.accountAlias}', 'external')">
+                            별칭 변경
+                        </button>
+                        ${account.verificationStatus === 'FAILED' || account.verificationStatus === 'PENDING' ? `
+                            <button class="btn btn-primary" onclick="reVerifyAccount(${account.id})">
+                                재인증
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-danger" onclick="deleteExternalAccount(${account.id})">
+                            연결 해제
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 인증 상태 텍스트 반환
+        function getVerificationStatusText(status) {
+            const statusMap = {
+                'VERIFIED': '✅ 인증 완료',
+                'PENDING': '⏳ 인증 대기',
+                'FAILED': '❌ 인증 실패',
+                'EXPIRED': '⏰ 인증 만료',
+                'SUSPENDED': '⏸️ 일시 중단'
+            };
+            return statusMap[status] || '알 수 없음';
+        }
+
+        // 은행 선택 그리드 초기화
+        function initializeBankGrid() {
+            const bankGrid = document.getElementById('externalBankGrid');
+            const banks = Object.keys(bankCodeMap);
+            
+            bankGrid.innerHTML = banks.map(bank => `
+                <div class="bank-item" data-bank-code="${bankCodeMap[bank]}" data-bank-name="${bank}" 
+                     onclick="selectBank('${bankCodeMap[bank]}', '${bank}')">
+                    ${bank}
+                </div>
+            `).join('');
+        }
+
+        // 은행 선택
+        function selectBank(bankCode, bankName) {
+            document.querySelectorAll('.bank-item').forEach(item => item.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            selectedBankCode = bankCode;
+            selectedBankName = bankName;
+            
+            console.log('은행 선택:', bankName, bankCode);
+        }
+
+        // 새 EasyPay 계좌 생성 모달 열기
+        function openNewAccountModal() {
+            document.getElementById('newAccountName').value = '';
+            document.getElementById('newAccountPin').value = '';
+            document.getElementById('newAccountModal').style.display = 'flex';
+        }
+
+        // 새 EasyPay 계좌 생성 모달 닫기
+        function closeNewAccountModal() {
+            document.getElementById('newAccountModal').style.display = 'none';
+        }
+
+        // 새 EasyPay 계좌 생성
+        async function createNewAccount() {
+            const accountName = document.getElementById('newAccountName').value.trim();
+            const pin = document.getElementById('newAccountPin').value.trim();
+            
+            if (!accountName) {
+                customAlert('계좌 이름을 입력해주세요.');
+                return;
+            }
+            
+            if (!pin || pin.length !== 6) {
+                customAlert('PIN 번호 6자리를 입력해주세요.');
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch('/api/user-accounts/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        accountName: accountName,
+                        pin: pin
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    customAlert('새 EasyPay 계좌가 생성되었습니다!');
+                    closeNewAccountModal();
+                    loadEasyPayAccounts();
+                } else {
+                    customAlert(result.message || '계좌 생성에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('계좌 생성 오류:', error);
+                customAlert('계좌 생성 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 외부 계좌 연결 모달 열기
+        function openExternalAccountModal() {
+            document.getElementById('externalAccountNumber').value = '';
+            document.getElementById('externalAccountAlias').value = '';
+            selectedBankCode = '';
+            selectedBankName = '';
+            document.querySelectorAll('.bank-item').forEach(item => item.classList.remove('selected'));
+            document.getElementById('externalAccountModal').style.display = 'flex';
+        }
+
+        // 외부 계좌 연결 모달 닫기
+        function closeExternalAccountModal() {
+            document.getElementById('externalAccountModal').style.display = 'none';
+        }
+
+        // 외부 계좌 등록
+        async function registerExternalAccount() {
+            const accountNumber = document.getElementById('externalAccountNumber').value.trim();
+            const accountAlias = document.getElementById('externalAccountAlias').value.trim();
+            
+            if (!selectedBankCode || !selectedBankName) {
+                customAlert('은행을 선택해주세요.');
+                return;
+            }
+            
+            if (!accountNumber) {
+                customAlert('계좌번호를 입력해주세요.');
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch('/api/external-accounts/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        accountNumber: accountNumber,
+                        bankCode: selectedBankCode,
+                        bankName: selectedBankName,
+                        accountAlias: accountAlias
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    customAlert('외부 계좌가 성공적으로 연결되었습니다!');
+                    closeExternalAccountModal();
+                    loadExternalAccounts();
+                } else {
+                    customAlert(result.message || '외부 계좌 연결에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('외부 계좌 등록 오류:', error);
+                customAlert('외부 계좌 연결 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 계좌 이름/별칭 수정 모달 열기
+        function editAccountName(accountIdOrNumber, currentName, accountType) {
+            document.getElementById('editAccountId').value = accountIdOrNumber;
+            document.getElementById('editAccountName').value = currentName || '';
+            document.getElementById('editAccountType').value = accountType;
+            
+            const title = accountType === 'easypay' ? 'EasyPay 계좌 이름 변경' : '외부 계좌 별칭 변경';
+            document.getElementById('editModalTitle').textContent = title;
+            
+            document.getElementById('editAccountModal').style.display = 'flex';
+        }
+
+        // 계좌 수정 모달 닫기
+        function closeEditAccountModal() {
+            document.getElementById('editAccountModal').style.display = 'none';
+        }
+
+        // 계좌 이름/별칭 업데이트
+        async function updateAccountName() {
+            const accountIdOrNumber = document.getElementById('editAccountId').value;
+            const newName = document.getElementById('editAccountName').value.trim();
+            const accountType = document.getElementById('editAccountType').value;
+            
+            if (!newName) {
+                customAlert('새로운 이름을 입력해주세요.');
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                let url, body;
+                
+                if (accountType === 'easypay') {
+                    url = `/api/user-accounts/${accountIdOrNumber}/name`;
+                    body = { accountName: newName };
+                } else {
+                    url = `/api/external-accounts/${accountIdOrNumber}/alias`;
+                    body = { accountAlias: newName };
+                }
+                
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    customAlert('이름이 성공적으로 변경되었습니다.');
+                    closeEditAccountModal();
+                    
+                    if (accountType === 'easypay') {
+                        loadEasyPayAccounts();
+                    } else {
+                        loadExternalAccounts();
+                    }
+                } else {
+                    customAlert(result.message || '이름 변경에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('계좌 이름 변경 오류:', error);
+                customAlert('이름 변경 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 기본 계좌 설정
+        async function setPrimaryAccount(accountNumber) {
+            const confirmed = await customConfirm('이 계좌를 기본 계좌로 설정하시겠습니까?');
+            if (!confirmed) {
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch('/api/user-accounts/primary', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ accountNumber: accountNumber })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    customAlert('기본 계좌가 변경되었습니다.');
+                    loadEasyPayAccounts();
+                } else {
+                    customAlert(result.message || '기본 계좌 변경에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('기본 계좌 변경 오류:', error);
+                customAlert('기본 계좌 변경 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 계좌 비활성화
+        async function deactivateAccount(accountNumber) {
+            const pin = prompt('계좌 비활성화를 위해 PIN 번호를 입력해주세요:');
+            
+            if (!pin || pin.length !== 6) {
+                customAlert('PIN 번호 6자리를 입력해주세요.');
+                return;
+            }
+            
+            const confirmed = await customConfirm('정말로 이 계좌를 비활성화하시겠습니까?\n비활성화된 계좌는 복구할 수 없습니다.');
+            if (!confirmed) {
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch(`/api/user-accounts/${accountNumber}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ pin: pin })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    customAlert('계좌가 비활성화되었습니다.');
+                    loadEasyPayAccounts();
+                } else {
+                    customAlert(result.message || '계좌 비활성화에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('계좌 비활성화 오류:', error);
+                customAlert('계좌 비활성화 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 외부 계좌 재인증
+        async function reVerifyAccount(accountId) {
+            const confirmed = await customConfirm('이 계좌를 재인증하시겠습니까?');
+            if (!confirmed) {
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch(`/api/external-accounts/${accountId}/re-verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    customAlert('계좌 재인증이 완료되었습니다.');
+                } else {
+                    customAlert('계좌 재인증에 실패했습니다: ' + (result.message || '알 수 없는 오류'));
+                }
+                
+                loadExternalAccounts();
+            } catch (error) {
+                console.error('계좌 재인증 오류:', error);
+                customAlert('계좌 재인증 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 외부 계좌 삭제
+        async function deleteExternalAccount(accountId) {
+            const confirmed = await customConfirm('정말로 이 외부 계좌 연결을 해제하시겠습니까?');
+            if (!confirmed) {
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch(`/api/external-accounts/${accountId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    customAlert('외부 계좌 연결이 해제되었습니다.');
+                    loadExternalAccounts();
+                } else {
+                    customAlert(result.message || '외부 계좌 연결 해제에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('외부 계좌 삭제 오류:', error);
+                customAlert('외부 계좌 연결 해제 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 뒤로가기
+        function goBack() {
+            window.location.href = '/main.html';
+        }
+
+        // 커스텀 알림창 함수
+        let confirmCallback = null;
+        
+        function customAlert(message) {
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('customAlertModal').style.display = 'flex';
+        }
+        
+        function closeCustomAlert() {
+            document.getElementById('customAlertModal').style.display = 'none';
+        }
+        
+        function customConfirm(message) {
+            return new Promise((resolve) => {
+                document.getElementById('confirmMessage').textContent = message;
+                document.getElementById('customConfirmModal').style.display = 'flex';
+                confirmCallback = resolve;
+            });
+        }
+        
+        function closeCustomConfirm(result) {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            if (confirmCallback) {
+                confirmCallback(result);
+                confirmCallback = null;
+            }
+        }
+
+        console.log('=== 계좌 관리 페이지 스크립트 로드 완료 ===');
+    </script>
+</body>
+</html>

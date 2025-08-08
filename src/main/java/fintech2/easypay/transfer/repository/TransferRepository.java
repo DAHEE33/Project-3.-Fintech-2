@@ -45,5 +45,22 @@ public interface TransferRepository extends JpaRepository<Transfer, Long> {
     List<Transfer> findByStatusInAndCreatedAtBefore(List<TransferStatus> statuses, 
                                                    LocalDateTime createdAt);
     
+    /**
+     * 최근 송금한 수신자들을 중복 제거하여 조회
+     * 각 수신자별로 가장 최근 거래만 가져옴
+     * JPQL을 사용하여 엔티티 필드명으로 처리
+     */
+    @Query("SELECT t FROM Transfer t " +
+           "WHERE t.sender.id = :senderId " +
+           "AND t.status = fintech2.easypay.transfer.entity.TransferStatus.COMPLETED " +
+           "AND t.createdAt = (" +
+           "    SELECT MAX(t2.createdAt) FROM Transfer t2 " +
+           "    WHERE t2.sender.id = :senderId " +
+           "    AND t2.receiver.id = t.receiver.id " +
+           "    AND t2.status = fintech2.easypay.transfer.entity.TransferStatus.COMPLETED" +
+           ") " +
+           "ORDER BY t.createdAt DESC")
+    Page<Transfer> findRecentDistinctReceivers(@Param("senderId") Long senderId, Pageable pageable);
+    
     boolean existsByTransactionId(String transactionId);
 }

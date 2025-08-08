@@ -99,10 +99,10 @@ async function backgroundTokenCheck() {
         
         // 만료되었거나 곧 만료될 예정이면 갱신 시도
         if (currentTime >= expirationTime || (expirationTime - currentTime < 60000)) {
-            console.log('🔄 백그라운드 토큰 갱신 시도...');
+            console.log('백그라운드 토큰 갱신 시도...');
             const success = await tryRefreshToken();
             if (!success) {
-                console.log('❌ 백그라운드 토큰 갱신 실패, 로그아웃');
+                console.log('백그라운드 토큰 갱신 실패, 로그아웃');
                 showAutoLogoutPopup();
             }
         }
@@ -118,28 +118,28 @@ async function backgroundTokenCheck() {
 async function tryRefreshToken() {
     // 이미 갱신 중이면 중복 실행 방지
     if (isRefreshing) {
-        console.log('🔄 이미 토큰 갱신 중... 대기');
+        console.log('이미 토큰 갱신 중... 대기');
         return false;
     }
     
     // 로그아웃 진행 중이면 갱신 시도하지 않음
     if (logoutInProgress) {
-        console.log('🚪 로그아웃 진행 중... 갱신 시도 중단');
+        console.log('로그아웃 진행 중... 갱신 시도 중단');
         return false;
     }
     
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {
-        console.log('❌ Refresh Token이 없습니다.');
+        console.log('Refresh Token이 없습니다.');
         return false;
     }
 
     isRefreshing = true;
     
     try {
-        console.log('🔄 === Refresh Token으로 토큰 갱신 시도 ===');
+        console.log('=== Refresh Token으로 토큰 갱신 시도 ===');
         
-        const response = await fetch('/auth/refresh', {
+        const response = await fetch('/api/auth/refresh', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -155,15 +155,15 @@ async function tryRefreshToken() {
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
             
-            console.log('✅ === 토큰 갱신 성공! ===');
+            console.log('=== 토큰 갱신 성공! ===');
             return true;
         } else {
-            console.log('❌ Refresh Token 갱신 실패:', response.status);
+            console.log('Refresh Token 갱신 실패:', response.status);
             const errorText = await response.text();
-            console.log('❌ 에러 응답:', errorText);
+            console.log('에러 응답:', errorText);
             
             if (response.status === 400 && (errorText.includes('EXPIRED_REFRESH_TOKEN') || errorText.includes('INVALID_REFRESH_TOKEN'))) {
-                console.log('🚪 Refresh Token 만료/무효로 즉시 로그아웃 실행');
+                console.log('Refresh Token 만료/무효로 즉시 로그아웃 실행');
                 showAutoLogoutPopup();
                 return false;
             }
@@ -171,7 +171,7 @@ async function tryRefreshToken() {
             return false;
         }
     } catch (error) {
-        console.error('❌ 토큰 갱신 중 오류:', error);
+        console.error('토큰 갱신 중 오류:', error);
         showAutoLogoutPopup();
         return false;
     } finally {
@@ -192,7 +192,7 @@ async function loadBalance() {
     }
     
     try {
-        const response = await fetch(`/accounts/${accountNumber}/balance`, {
+        const response = await fetch(`/api/accounts/${accountNumber}/balance`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -253,7 +253,7 @@ async function markAlarmsAsRead() {
     }
     
     try {
-        const response = await fetch('/alarms/mark-read', {
+        const response = await fetch('/api/alarms/mark-read', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -279,7 +279,7 @@ async function loadAlarms() {
     const token = localStorage.getItem('accessToken');
     
     try {
-        const response = await fetch('/alarms/list', {
+        const response = await fetch('/api/alarms/list', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -363,7 +363,7 @@ async function loadTransactions() {
     }
     
     try {
-        const response = await fetch(`/accounts/${accountNumber}/transactions`, {
+        const response = await fetch(`/api/accounts/${accountNumber}/transactions`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -461,6 +461,18 @@ function formatAmount(amount) {
     return new Intl.NumberFormat('ko-KR').format(Math.abs(amount));
 }
 
+// 알람 메시지에서 금액 형식 수정 (소수점 제거 및 천 단위 콤마 추가)
+function formatAlarmMessage(message) {
+    // 금액 패턴 찾기 (예: 1234567.00원, 1234567원, 1,234,567.00원 등)
+    return message.replace(/(\d+(?:,\d{3})*(?:\.\d+)?)(원)/g, function(match, amount, won) {
+        // 콤마와 소수점 제거하여 순수 숫자만 추출
+        const cleanNumber = amount.replace(/[,\.]/g, '').replace(/\.\d+$/, '');
+        // 정수로 변환 후 천 단위 콤마 추가
+        const formattedNumber = parseInt(cleanNumber).toLocaleString('ko-KR');
+        return formattedNumber + won;
+    });
+}
+
 // 알람 표시
 function displayAlarms(alarms) {
     const listElement = document.getElementById('alarmList');
@@ -473,6 +485,8 @@ function displayAlarms(alarms) {
     const html = alarms.map(alarm => {
         const levelClass = getLevelClass(alarm.level);
         const typeIcon = getTypeIcon(alarm.type);
+        // 알람 메시지의 금액 형식 수정
+        const formattedMessage = formatAlarmMessage(alarm.message);
         
         return `
             <div class="alarm-item ${levelClass}">
@@ -480,7 +494,7 @@ function displayAlarms(alarms) {
                     <div class="alarm-type">${typeIcon} ${getTypeName(alarm.type)}</div>
                     <div class="alarm-time">${formatTime(new Date(alarm.timestamp))}</div>
                 </div>
-                <div class="alarm-message">${alarm.message}</div>
+                <div class="alarm-message">${formattedMessage}</div>
             </div>
         `;
     }).join('');
@@ -504,7 +518,7 @@ async function filterAlarms(category, event) {
     const token = localStorage.getItem('accessToken');
     
     try {
-        const response = await fetch(`/alarms/list?category=${category}`, {
+        const response = await fetch(`/api/alarms/list?category=${category}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
