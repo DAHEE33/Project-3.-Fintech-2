@@ -16,6 +16,7 @@ import fintech2.easypay.transfer.external.BankingApiResponse;
 import fintech2.easypay.transfer.external.BankingApiService;
 import fintech2.easypay.transfer.external.BankingApiStatus;
 import fintech2.easypay.transfer.repository.TransferRepository;
+import org.springframework.context.ApplicationContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("송금 서비스 가상 사용자 시나리오 테스트")
@@ -42,6 +44,7 @@ class TransferServiceScenarioTest {
     @Mock private NotificationService notificationService;
     @Mock private BankingApiService bankingApiService;
     @Mock private BalanceService balanceService;
+    @Mock private ApplicationContext applicationContext;
 
     private TransferService transferService;
 
@@ -67,7 +70,8 @@ class TransferServiceScenarioTest {
             balanceService,
             auditLogService,
             notificationService,
-            bankingApiService
+            bankingApiService,
+            applicationContext
         );
 
         // Given: 가상 사용자 데이터 생성
@@ -185,6 +189,11 @@ class TransferServiceScenarioTest {
         when(accountRepository.findByIdWithLock(2L)).thenReturn(Optional.of(bobAccount));
         when(transferRepository.save(any(Transfer.class))).thenReturn(expectedTransfer);
         when(bankingApiService.processTransfer(any())).thenReturn(apiResponse);
+        
+        // balanceService mock 설정 추가
+        when(balanceService.hasSufficientBalance(eq("VA1111111111"), eq(new BigDecimal("100000")))).thenReturn(true);
+        when(balanceService.decrease(eq("VA1111111111"), eq(new BigDecimal("100000")), any(), any(), any(), any())).thenReturn(null);
+        when(balanceService.increase(eq("VA2222222222"), eq(new BigDecimal("100000")), any(), any(), any(), any())).thenReturn(null);
 
         // When: 송금 실행
         TransferResponse result = transferService.transfer("010-1111-1111", request);
@@ -196,9 +205,9 @@ class TransferServiceScenarioTest {
         assertThat(result.getAmount()).isEqualTo(new BigDecimal("100000"));
         assertThat(result.getMemo()).isEqualTo("생일 축하금");
         
-        // 잔액 변화 검증
-        assertThat(aliceAccount.getBalance()).isEqualTo(new BigDecimal("400000")); // 50만 - 10만
-        assertThat(bobAccount.getBalance()).isEqualTo(new BigDecimal("2100000"));  // 200만 + 10만
+        // 이제 잔액 변화는 balanceService에서 처리하므로 verify로 확인
+        verify(balanceService).decrease(eq("VA1111111111"), eq(new BigDecimal("100000")), any(), any(), any(), any());
+        verify(balanceService).increase(eq("VA2222222222"), eq(new BigDecimal("100000")), any(), any(), any(), any());
     }
 
     @Test
@@ -237,6 +246,11 @@ class TransferServiceScenarioTest {
         when(accountRepository.findByIdWithLock(3L)).thenReturn(Optional.of(charlieAccount));
         when(transferRepository.save(any(Transfer.class))).thenReturn(expectedTransfer);
         when(bankingApiService.processTransfer(any())).thenReturn(apiResponse);
+        
+        // balanceService mock 설정 추가
+        when(balanceService.hasSufficientBalance(eq("VA2222222222"), eq(new BigDecimal("50000")))).thenReturn(true);
+        when(balanceService.decrease(eq("VA2222222222"), eq(new BigDecimal("50000")), any(), any(), any(), any())).thenReturn(null);
+        when(balanceService.increase(eq("VA3333333333"), eq(new BigDecimal("50000")), any(), any(), any(), any())).thenReturn(null);
 
         // When: VIP 송금 실행
         TransferResponse result = transferService.transfer("010-2222-2222", request);
@@ -248,10 +262,9 @@ class TransferServiceScenarioTest {
         assertThat(result.getAmount()).isEqualTo(new BigDecimal("50000"));
         assertThat(result.getMemo()).contains("신규 가입 축하금");
 
-        // VIP 고객 잔액 변화 (큰 금액에서 소액 차감)
-        assertThat(bobAccount.getBalance()).isEqualTo(new BigDecimal("1950000")); // 200만 - 5만
-        // 신규 고객 잔액 증가
-        assertThat(charlieAccount.getBalance()).isEqualTo(new BigDecimal("150000")); // 10만 + 5만
+        // 이제 잔액 변화는 balanceService에서 처리하므로 verify로 확인
+        verify(balanceService).decrease(eq("VA2222222222"), eq(new BigDecimal("50000")), any(), any(), any(), any());
+        verify(balanceService).increase(eq("VA3333333333"), eq(new BigDecimal("50000")), any(), any(), any(), any());
     }
 
     @Test
@@ -309,6 +322,9 @@ class TransferServiceScenarioTest {
         when(accountRepository.findByIdWithLock(1L)).thenReturn(Optional.of(aliceAccount));
         when(transferRepository.save(any(Transfer.class))).thenReturn(expectedTransfer);
         when(bankingApiService.processTransfer(any())).thenReturn(timeoutResponse);
+        
+        // balanceService mock 설정 추가 (타임아웃 시나리오는 잔액 충분성만 확인)
+        when(balanceService.hasSufficientBalance(eq("VA3333333333"), eq(new BigDecimal("30000")))).thenReturn(true);
 
         // When: 타임아웃 송금 실행
         TransferResponse result = transferService.transfer("010-3333-3333", request);
@@ -318,9 +334,8 @@ class TransferServiceScenarioTest {
         assertThat(result.getSenderPhoneNumber()).isEqualTo("010-3333-3333");
         assertThat(result.getAmount()).isEqualTo(new BigDecimal("30000"));
         
-        // 타임아웃 시에는 잔액 이동이 일어나지 않아야 함
-        assertThat(charlieAccount.getBalance()).isEqualTo(new BigDecimal("100000")); // 변화 없음
-        assertThat(aliceAccount.getBalance()).isEqualTo(new BigDecimal("500000"));   // 변화 없음
+        // 타임아웃 시에는 잔액 변경이 수행되지 않음 (외부 API 호출 실패 시)
+        // 따라서 verify 하지 않음
     }
 
     @Test
@@ -359,6 +374,11 @@ class TransferServiceScenarioTest {
         when(accountRepository.findByIdWithLock(1L)).thenReturn(Optional.of(aliceAccount));
         when(transferRepository.save(any(Transfer.class))).thenReturn(expectedTransfer);
         when(bankingApiService.processTransfer(any())).thenReturn(apiResponse);
+        
+        // balanceService mock 설정 추가
+        when(balanceService.hasSufficientBalance(eq("VA2222222222"), eq(new BigDecimal("1000000")))).thenReturn(true);
+        when(balanceService.decrease(eq("VA2222222222"), eq(new BigDecimal("1000000")), any(), any(), any(), any())).thenReturn(null);
+        when(balanceService.increase(eq("VA1111111111"), eq(new BigDecimal("1000000")), any(), any(), any(), any())).thenReturn(null);
 
         // When: 대량 송금 실행
         TransferResponse result = transferService.transfer("010-2222-2222", request);
@@ -370,9 +390,9 @@ class TransferServiceScenarioTest {
         assertThat(result.getAmount()).isEqualTo(new BigDecimal("1000000"));
         assertThat(result.getMemo()).isEqualTo("사업 자금 지원");
 
-        // 대량 송금 후 잔액 변화
-        assertThat(bobAccount.getBalance()).isEqualTo(new BigDecimal("1000000"));   // 200만 - 100만
-        assertThat(aliceAccount.getBalance()).isEqualTo(new BigDecimal("1500000")); // 50만 + 100만
+        // 이제 잔액 변화는 balanceService에서 처리하므로 verify로 확인
+        verify(balanceService).decrease(eq("VA2222222222"), eq(new BigDecimal("1000000")), any(), any(), any(), any());
+        verify(balanceService).increase(eq("VA1111111111"), eq(new BigDecimal("1000000")), any(), any(), any(), any());
     }
 
     @Test

@@ -72,7 +72,7 @@ async function loadNotifications() {
     }
     
     try {
-        const response = await fetch('/alarms/count', {
+        const response = await fetch('/api/alarms/count', {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -191,10 +191,10 @@ async function backgroundTokenCheck() {
         
         // 만료되었거나 곧 만료될 예정이면 갱신 시도
         if (currentTime >= expirationTime || (expirationTime - currentTime < 60000)) {
-            console.log('🔄 백그라운드 토큰 갱신 시도...');
+            console.log('백그라운드 토큰 갱신 시도...');
             const success = await tryRefreshToken();
             if (!success) {
-                console.log('❌ 백그라운드 토큰 갱신 실패, 로그아웃');
+                console.log('백그라운드 토큰 갱신 실패, 로그아웃');
                 showAutoLogoutPopup();
             }
         }
@@ -208,28 +208,28 @@ async function backgroundTokenCheck() {
 async function tryRefreshToken() {
     // 이미 갱신 중이면 중복 실행 방지
     if (isRefreshing) {
-        console.log('🔄 이미 토큰 갱신 중... 대기');
+        console.log('이미 토큰 갱신 중... 대기');
         return false;
     }
     
     // 로그아웃 진행 중이면 갱신 시도하지 않음
     if (logoutInProgress) {
-        console.log('🚪 로그아웃 진행 중... 갱신 시도 중단');
+        console.log('로그아웃 진행 중... 갱신 시도 중단');
         return false;
     }
     
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {
-        console.log('❌ Refresh Token이 없습니다.');
+        console.log('Refresh Token이 없습니다.');
         return false;
     }
 
     isRefreshing = true;
     
     try {
-        console.log('🔄 === Refresh Token으로 토큰 갱신 시도 ===');
+        console.log('=== Refresh Token으로 토큰 갱신 시도 ===');
         
-        const response = await fetch('/auth/refresh', {
+        const response = await fetch('/api/auth/refresh', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -245,15 +245,15 @@ async function tryRefreshToken() {
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
             
-            console.log('✅ === 토큰 갱신 성공! ===');
+            console.log('=== 토큰 갱신 성공! ===');
             return true;
         } else {
-            console.log('❌ Refresh Token 갱신 실패:', response.status);
+            console.log('Refresh Token 갱신 실패:', response.status);
             const errorText = await response.text();
-            console.log('❌ 에러 응답:', errorText);
+            console.log('에러 응답:', errorText);
             
             if (response.status === 400 && (errorText.includes('EXPIRED_REFRESH_TOKEN') || errorText.includes('INVALID_REFRESH_TOKEN'))) {
-                console.log('🚪 Refresh Token 만료/무효로 즉시 로그아웃 실행');
+                console.log('Refresh Token 만료/무효로 즉시 로그아웃 실행');
                 showAutoLogoutPopup();
                 return false;
             }
@@ -261,7 +261,7 @@ async function tryRefreshToken() {
             return false;
         }
     } catch (error) {
-        console.error('❌ 토큰 갱신 중 오류:', error);
+        console.error('토큰 갱신 중 오류:', error);
         showAutoLogoutPopup();
         return false;
     } finally {

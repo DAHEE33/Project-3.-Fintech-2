@@ -1,6 +1,7 @@
 package fintech2.easypay.transfer.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import fintech2.easypay.common.BusinessException;
 import fintech2.easypay.common.ErrorCode;
 import fintech2.easypay.auth.entity.User;
 import fintech2.easypay.auth.repository.UserRepository;
+import fintech2.easypay.transfer.dto.RecentTransferResponse;
 import fintech2.easypay.transfer.dto.TransferRequest;
 import fintech2.easypay.transfer.dto.TransferResponse;
 import fintech2.easypay.transfer.entity.Transfer;
@@ -29,6 +31,7 @@ import fintech2.easypay.transfer.external.BankingApiResponse;
 import fintech2.easypay.transfer.external.BankingApiService;
 import fintech2.easypay.transfer.external.BankingApiStatus;
 import fintech2.easypay.transfer.repository.TransferRepository;
+import org.springframework.context.ApplicationContext;
 
 /**
  * 송금 서비스
@@ -48,6 +51,7 @@ public class TransferService {
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
     private final BankingApiService bankingApiService;
+    private final ApplicationContext applicationContext;
     
     /**
      * 사용자 간 송금 처리
@@ -78,9 +82,28 @@ public class TransferService {
             throw new BusinessException(ErrorCode.SAME_ACCOUNT_TRANSFER);
         }
         
-        // 송금자 계좌 조회 (락 없이 먼저 조회)
-        Account senderAccount = accountRepository.findByUserId(sender.getId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+        // 송금자 계좌 조회 (요청에 계좌번호가 있으면 해당 계좌 사용, 없으면 주계좌 사용)
+        Account senderAccount;
+        if (request.getSenderAccountNumber() != null && !request.getSenderAccountNumber().trim().isEmpty()) {
+            // 특정 계좌 지정된 경우
+            senderAccount = accountRepository.findByAccountNumber(request.getSenderAccountNumber())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND));
+            
+            // 송금자 본인의 계좌인지 확인
+            if (!senderAccount.getUserId().equals(sender.getId())) {
+                throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, "본인 계좌가 아닙니다.");
+            }
+        } else {
+            // UserAccount에서 기본 계좌 사용 (수정된 로직)
+            fintech2.easypay.account.service.UserAccountService userAccountService = 
+                applicationContext.getBean(fintech2.easypay.account.service.UserAccountService.class);
+            fintech2.easypay.account.entity.UserAccount primaryUserAccount = userAccountService.getPrimaryAccount(sender.getId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, "기본 계좌를 찾을 수 없습니다."));
+            
+            // UserAccount의 계좌번호로 Account 엔티티 조회
+            senderAccount = accountRepository.findByAccountNumber(primaryUserAccount.getAccountNumber())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, "기본 계좌에 해당하는 Account를 찾을 수 없습니다."));
+        }
         
         // 데드락 방지를 위한 순서대로 락 획득
         Account senderAccountLocked;
@@ -263,6 +286,22 @@ public class TransferService {
         
         Page<Transfer> transfers = transferRepository.findByReceiverIdOrderByCreatedAtDesc(user.getId(), pageable);
         return transfers.map(TransferResponse::from);
+    }
+    
+    /**
+     * 최근 송금한 사람들의 목록 조회 (중복 제거)
+     * 가장 최근에 송금한 순서대로 정렬
+     * @param phoneNumber 사용자 휴대폰 번호
+     * @param pageable 페이지 정보
+     * @return 최근 송금 대상 목록
+     */
+    public Page<RecentTransferResponse> getRecentTransfers(String phoneNumber, Pageable pageable) {
+        User user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        
+        // 성공한 송금만 조회하고, 수신자별로 가장 최근 거래만 가져옴
+        Page<Transfer> transfers = transferRepository.findRecentDistinctReceivers(user.getId(), pageable);
+        return transfers.map(RecentTransferResponse::from);
     }
     
     /**

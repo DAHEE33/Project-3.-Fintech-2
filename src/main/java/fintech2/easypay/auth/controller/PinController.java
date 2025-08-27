@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/pin")
+@RequestMapping("/api/pin")
 @RequiredArgsConstructor
 public class PinController {
 

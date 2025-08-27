@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>EasyPay - 송금하기</title>
     <link rel="stylesheet" href="/css/common.css">
     <script defer src="/js/common.js"></script>
-    <!-- Updated: 2024-08-01 Modal and Balance Card Colors -->
     <style>
         * {
             margin: 0;
@@ -15,292 +17,163 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: #f8f9fa;
-            color: #333;
-            line-height: 1.6;
-            overflow-x: hidden;
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
         }
 
         .container {
-            max-width: 480px;
+            max-width: 400px;
             margin: 0 auto;
             background: white;
-            min-height: 100vh;
-            position: relative;
-            padding-top: 220px;
-            padding-bottom: 100px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: slideUp 0.3s ease-out;
         }
 
-        /* 헤더 */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 24px 20px;
+            position: relative;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            z-index: 101;
+            align-items: center;
         }
 
         .header h1 {
-            font-size: 22px;
+            font-size: 28px;
             font-weight: 600;
+            margin: 0;
         }
 
         .header-back {
-            background: rgba(255, 255, 255, 0.2);
+            background: none;
             border: none;
             color: white;
-            padding: 8px 12px;
-            border-radius: 12px;
-            cursor: pointer;
             font-size: 20px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.3s;
         }
 
         .header-back:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .header-back:active {
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* 현재 잔액 카드 - 기본 */
-        .balance-card {
-            padding: 20px;
-            border-radius: 16px;
-            color: white;
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-3px);
-            width: 100%;
-            max-width: 480px;
-            z-index: 100;
-            overflow: hidden;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            margin: 0;
-            transition: all 0.5s ease;
-            box-sizing: border-box;
+        .content {
+            padding: 30px;
         }
 
-        /* 잔액별 색상 클래스 */
-        .balance-card.tier-1 { /* 1천만원 미만 - 연한 보라색 */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 잔액 카드 */
+        .balance-card {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 16px;
+            color: white;
+            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .balance-card.tier-1 {
             background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
         }
 
-        .balance-card.tier-2 { /* 1천만원~5천만원 - 중간 보라색 */
+        .balance-card.tier-2 {
             background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
         }
 
-        .balance-card.tier-3 { /* 5천만원~1억 - 진한 보라색 */
+        .balance-card.tier-3 {
             background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         }
 
-        .balance-card.tier-4 { /* 1억~10억 - 더 진한 보라색 */
+        .balance-card.tier-4 {
             background: linear-gradient(135deg, #7c3aed 0%, #6b46c1 100%);
         }
 
-        .balance-card.tier-vip { /* 10억 이상 - 특별한 골드 그라데이션 */
+        .balance-card.tier-vip {
             background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
-            animation: vipGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes vipGlow {
-            0% {
-                transform: translateX(-50%) translateY(-3px) scale(1);
-            }
-            100% {
-                transform: translateX(-50%) translateY(-5px) scale(1.02);
-            }
-        }
-
-        .balance-card.tier-vip::before {
-            background: rgba(255, 255, 255, 0.2);
-            animation: sparkle 2s linear infinite;
-        }
-
-        @keyframes sparkle {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.4; }
-        }
-
-        .balance-card.tier-vip .balance-amount {
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.3);
-            animation: amountGlow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes amountGlow {
-            0% { text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.3); }
-            100% { text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.5); }
-        }
-
-
-        .balance-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-
-        .balance-card-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 20px;
-        }
-
-        .balance-left {
-            flex: 1;
-        }
-
-        .balance-right {
-            flex: 0 0 auto;
-            text-align: right;
-            min-width: 120px;
         }
 
         .balance-label {
             font-size: 14px;
-            opacity: 0.9;
+            opacity: 0.8;
             margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
         }
 
         .balance-amount {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
-            margin-bottom: 4px;
-            color: #ffffff !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            color: #ffffff;
+            margin-bottom: 8px;
         }
 
         .balance-account {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .balance-info span {
             font-size: 12px;
-            opacity: 1;
-            color: #1a1a1a !important;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-            margin-top: 4px;
+            opacity: 0.8;
         }
-        
-        .balance-info {
-            margin-top: 8px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 400;
-        }
-        
+
         .info-separator {
             margin: 0 8px;
-            opacity: 0.6;
-        }
-
-        .receiver-label {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-
-        .receiver-account {
-            font-size: 13px;
-            color: #ffffff;
-            font-weight: 600;
-            margin-bottom: 4px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .receiver-bank {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 6px;
-            border-radius: 4px;
-            display: inline-block;
-            font-weight: 500;
         }
 
         /* 수신자 선택 섹션 */
         .recipient-section {
-            padding: 20px;
-            margin: 20px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            margin-bottom: 30px;
         }
 
         .section-title {
             font-size: 18px;
             font-weight: 600;
-            margin: 20px 0 16px 0;
+            margin-bottom: 15px;
             color: #333;
         }
 
         .recipient-tabs {
             display: flex;
-            background: white;
-            border-radius: 12px;
-            padding: 4px;
-            margin-top: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 4px;
         }
 
         .tab-button {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             border: none;
-            margin-top: 3px;
-            background: transparent;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            color: #666;
+            background: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .tab-button.active {
-            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
-            color: white;
-            box-shadow: 0 6px 16px rgba(196, 181, 253, 0.4), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .tab-button:hover:not(.active) {
-            background: rgba(196, 181, 253, 0.2);
-            color: #8b5cf6;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(196, 181, 253, 0.2);
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .tab-content {
@@ -311,74 +184,43 @@
             display: block;
         }
 
-        /* 계좌번호 입력 */
+        /* 계좌 입력 */
         .account-input-section {
             margin-bottom: 20px;
         }
 
         .input-group {
             position: relative;
-            margin-bottom: 16px;
         }
 
         .input-with-camera {
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 10px;
         }
 
         .account-input {
             flex: 1;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            cursor: pointer;
         }
 
         .account-input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-            transform: translateY(-1px);
         }
 
         .camera-button {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%);
-            border: none;
-            border-radius: 12px;
+            padding: 15px;
+            background: #667eea;
             color: white;
-            font-size: 18px;
+            border: none;
+            border-radius: 10px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 16px rgba(147, 197, 253, 0.4), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .camera-button:hover {
-            background: linear-gradient(135deg, #7dd3fc 0%, #2563eb 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(147, 197, 253, 0.5), 
-                        0 4px 8px rgba(0, 0, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .camera-button:active {
-            transform: translateY(0px);
-            box-shadow: 0 2px 8px rgba(147, 197, 253, 0.3), 
-                        0 1px 2px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            font-size: 16px;
         }
 
         /* 내 계좌 목록 */
@@ -388,63 +230,44 @@
 
         .accounts-toggle {
             width: 100%;
-            padding: 16px;
+            padding: 15px;
             background: white;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .accounts-toggle:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-        }
-
-        .accounts-toggle-text {
             font-size: 14px;
-            color: #666;
+            font-weight: 500;
         }
 
         .accounts-count {
-            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
+            background: #667eea;
             color: white;
-            padding: 6px 10px;
+            padding: 4px 8px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(196, 181, 253, 0.3), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .accounts-list {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
+            display: none;
+            margin-top: 10px;
             background: white;
-            border-radius: 12px;
-            margin-top: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .accounts-list.expanded {
-            max-height: 300px;
-            border: 1px solid #e9ecef;
+        .accounts-list.show {
+            display: block;
         }
 
         .account-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s ease;
         }
 
         .account-item:hover {
@@ -456,14 +279,14 @@
         }
 
         .account-info {
-            font-size: 14px;
+            font-weight: 500;
             color: #333;
+            margin-bottom: 4px;
         }
 
         .account-number {
             font-size: 12px;
             color: #666;
-            margin-top: 2px;
         }
 
         /* 최근 송금 내역 */
@@ -471,23 +294,30 @@
             margin-bottom: 20px;
         }
 
+        .search-box {
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
         .recent-transfers {
             background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-            max-height: 300px;
-            overflow-y: auto;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .transfer-item {
-            padding: 16px;
-            border-bottom: 1px solid #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            transition: background 0.2s ease;
         }
 
         .transfer-item:hover {
@@ -498,52 +328,246 @@
             border-bottom: none;
         }
 
-        .transfer-info {
-            flex: 1;
-        }
-
         .transfer-name {
-            font-size: 14px;
             font-weight: 500;
             color: #333;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .transfer-details {
             font-size: 12px;
             color: #666;
+            display: flex;
+            justify-content: space-between;
         }
 
-        .favorite-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: transparent;
-            color: #ddd;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-
-        .favorite-btn.active {
-            color: #ffc107;
-        }
-
-        .favorite-btn:hover {
+        .transfer-memo {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            font-style: italic;
             background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-left: 2px solid #667eea;
         }
 
-        /* 송금 폼 */
-        .transfer-form {
-            padding: 20px;
-            margin: 20px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        /* 다음 단계 버튼 */
+        .next-step-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .next-step-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 모달 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
             border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            max-width: 90%;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .modal-btn-cancel {
+            background: #f8f9fa;
+            color: #666;
+        }
+
+        .modal-btn-confirm {
+            background: #667eea;
+            color: white;
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 성공/에러 모달 스타일 */
+        .success-modal, .error-modal {
+            text-align: center;
+            max-width: 400px;
+            padding: 30px;
+        }
+
+        .success-icon, .error-icon {
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .success-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .error-title {
+            color: #dc3545;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .success-content, .error-content {
+            margin-bottom: 30px;
+        }
+
+        .success-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .success-item:last-child {
+            border-bottom: none;
+        }
+
+        .success-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .success-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .error-message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* 계좌 정보 표시 스타일 개선 */
+        .sender-info-brief, .recipient-info-brief {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .account-info-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .account-details {
+            color: #212529;
+        }
+        
+        .account-main-info {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            line-height: 1.3;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .account-sub-info {
+            font-size: 12px;
+            color: #6c757d;
+            line-height: 1.2;
+        }
+        
+        .sender-info-brief {
+            border-left: 4px solid #28a745;
+        }
+        
+        .recipient-info-brief {
+            border-left: 4px solid #007bff;
+        }
+        
+        .balance-info {
+            font-size: 13px;
+            color: #28a745;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* 폼 그룹 */
         .form-group {
             margin-bottom: 20px;
         }
@@ -551,785 +575,322 @@
         .form-label {
             display: block;
             margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
+            font-weight: 500;
             color: #333;
-        }
-        
-        .form-guide {
-            margin-top: 12px;
-            padding: 16px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 1px solid rgba(102, 126, 234, 0.1);
-        }
-        
-        .guide-label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #666;
-        }
-        
-        .guide-input {
-            font-size: 16px;
-            padding: 16px;
         }
 
         .form-input {
             width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
         }
 
         .form-input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-            transform: translateY(-1px);
         }
 
-        .amount-group {
-            position: relative;
-        }
-
-        .amount-input {
-            padding-right: 50px;
-        }
-
-        .currency-label {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #666;
-            font-weight: 500;
-            pointer-events: none;
-        }
-
-        .memo-input {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 6px;
-        }
-
-        /* 하단 고정 버튼 */
-        .bottom-section {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 480px;
-            background: white;
-            padding: 20px;
-            border-top: 1px solid #e9ecef;
-            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .submit-button {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5), 
-                        0 3px 8px rgba(0, 0, 0, 0.15),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .submit-button:hover {
-            transform: translateY(-4px);
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4492 100%);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6), 
-                        0 4px 12px rgba(0, 0, 0, 0.2),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .submit-button:active {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4), 
-                        0 2px 6px rgba(0, 0, 0, 0.1),
-                        inset 0 2px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .submit-button:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(156, 163, 175, 0.3), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            opacity: 0.7;
-        }
-
-        /* 로딩 상태 */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .loading-spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 검색 기능 */
-        .search-box {
-            margin-bottom: 16px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        /* 반응형 */
-        @media (max-width: 480px) {
-            .container {
-                margin: 0;
-                border-radius: 0;
-            }
-        }
-
-        /* 접근성 개선 */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* 고대비 모드 */
-        @media (prefers-contrast: high) {
-            .submit-button {
-                border: 2px solid #000;
-            }
-        }
-
-        /* 모달 스타일 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: transparent;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            position: relative;
-            animation: modalSlideUp 0.3s ease-out;
-            display: flex;
-            flex-direction: column;
-            padding-top: 80px;
-            padding-bottom: 80px;
-        }
-
-        @keyframes modalSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px 16px 0 0;
-            position: relative;
-            z-index: 1001;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-            margin: 0;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .modal-close {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            font-size: 24px;
-            color: white;
-            cursor: pointer;
-            padding: 0;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 
-                        0 3px 6px rgba(0, 0, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .modal-close:active {
-            transform: translateY(0px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 
-                        0 1px 2px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-body {
-            padding: 30px 20px;
-            flex: 1;
-            overflow-y: auto;
-            max-height: calc(80vh - 200px);
-            background: white;
-        }
-
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        .account-input-modal {
-            background: white;
-            padding: 20px;
-            margin: 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .account-input-modal input {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .account-input-modal input:focus {
-            outline: none;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .account-input-modal input::placeholder {
-            color: #666;
-            font-weight: 400;
-        }
-
+        /* 은행 선택 그리드 */
         .bank-section {
-            margin: 25px 0 40px 0;
+            margin-bottom: 20px;
         }
 
         .section-header {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+            color: #333;
         }
 
         .bank-grid {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .bank-category {
+            margin-bottom: 20px;
+        }
+
+        .category-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .category-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
 
         .bank-item {
-            padding: 16px 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
+            padding: 12px 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 11px;
+            transition: all 0.2s ease;
             background: white;
         }
 
         .bank-item:hover {
             border-color: #667eea;
-            background: #f8f9ff;
-            transform: translateY(-2px);
+            background: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .bank-item.selected {
             border-color: #667eea;
             background: #667eea;
             color: white;
-        }
-
-        .bank-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .bank-name {
-            font-size: 14px;
             font-weight: 500;
         }
 
-        .securities-section {
-            border-top: 1px solid #e9ecef;
-            padding-top: 20px;
+        /* 계좌 검증 상태 */
+        .verification-status {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            display: none;
         }
 
-        .modal-footer {
+        .verification-status.loading {
+            display: block;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .verification-status.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .verification-status.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .account-holder-name {
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* 받는 계좌 정보 표시 */
+        .recipient-info-section {
+            margin-bottom: 25px;
             padding: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .recipient-info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
             display: flex;
-            gap: 12px;
-            position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 0 0 16px 16px;
-            z-index: 1001;
-            box-shadow: 0 -2px 8px rgba(102, 126, 234, 0.3);
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recipient-info-title::before {
+            content: '👤';
+            font-size: 18px;
+        }
+
+        .recipient-info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .recipient-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .recipient-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .recipient-info-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .recipient-info-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* 빠른 금액 선택 버튼 */
+        .quick-amount-buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .quick-amount-btn {
+            padding: 8px 6px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-amount-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        .quick-amount-btn:active {
+            transform: translateY(0);
+            background: #667eea;
+            color: white;
+        }
+
+        /* 금액 입력 필드 */
+        .amount-input {
+            text-align: right;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 숫자 입력 필드의 화살표 제거 */
+        .amount-input::-webkit-outer-spin-button,
+        .amount-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
             margin: 0;
         }
 
-        .modal-btn {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .amount-input[type=number] {
+            -moz-appearance: textfield;
         }
 
-        .modal-btn-cancel {
-            background: #d1d5db;
-            color: white;
-            border: none;
-            box-shadow: 0 4px 12px rgba(209, 213, 219, 0.3), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* 금액 표시 */
+        .amount-display {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 500;
+            text-align: right;
+            min-height: 20px;
         }
 
-        .modal-btn-cancel:hover {
-            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(196, 181, 253, 0.4), 
-                        0 3px 6px rgba(0, 0, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        /* 확인 정보 */
+        .confirm-info {
+            margin-bottom: 20px;
         }
 
-        .modal-btn-cancel:active {
-            transform: translateY(0px);
-            box-shadow: 0 2px 8px rgba(209, 213, 219, 0.2), 
-                        0 1px 2px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-btn-confirm {
-            background: #d1d5db;
-            color: white;
-            font-weight: 700;
-            border: none;
-            box-shadow: 0 4px 12px rgba(209, 213, 219, 0.3), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-btn-confirm:hover:not(:disabled) {
-            background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(196, 181, 253, 0.4), 
-                        0 3px 6px rgba(0, 0, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        }
-
-        .modal-btn-confirm:active:not(:disabled) {
-            transform: translateY(0px);
-            box-shadow: 0 2px 8px rgba(209, 213, 219, 0.2), 
-                        0 1px 2px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-btn-confirm.active {
-            background: linear-gradient(135deg, #b794f6 0%, #9f7aea 100%);
-            color: white;
-            box-shadow: 0 6px 16px rgba(183, 148, 246, 0.4), 
-                        0 3px 6px rgba(0, 0, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-btn-confirm.active:hover {
-            transform: translateY(-3px);
-            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-            box-shadow: 0 8px 20px rgba(183, 148, 246, 0.5), 
-                        0 4px 8px rgba(0, 0, 0, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .modal-btn-confirm.active:active {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(183, 148, 246, 0.3), 
-                        0 2px 4px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-btn-confirm:disabled {
-            background: #d1d5db;
-            color: white;
-            cursor: not-allowed;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(209, 213, 219, 0.2), 
-                        0 2px 4px rgba(0, 0, 0, 0.05),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            opacity: 0.7;
-        }
-        
-        /* 송금 확인 모달 스타일 */
-        .confirm-section {
-            padding: 10px 0;
-        }
-        
         .confirm-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #f0f0f0;
         }
-        
+
         .confirm-item:last-child {
             border-bottom: none;
         }
-        
+
         .confirm-label {
-            font-size: 14px;
             font-weight: 500;
-            color: #666;
-            min-width: 80px;
+            color: #333;
         }
-        
+
         .confirm-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            text-align: right;
-            flex: 1;
-        }
-        
-        .confirm-value.highlight {
-            color: #667eea;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        /* 공통 Alert 모달 스타일 */
-        .alert-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .alert-overlay.show {
-            display: flex;
-        }
-
-        .alert-content {
-            background: white;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-            animation: alertSlideUp 0.3s ease-out;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes alertSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .alert-header {
-            padding: 20px 20px 10px 20px;
-            text-align: center;
-        }
-
-        .alert-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .alert-icon.success { color: #10b981; }
-        .alert-icon.error { color: #ef4444; }
-        .alert-icon.warning { color: #f59e0b; }
-        .alert-icon.info { color: #3b82f6; }
-
-        .alert-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .alert-message {
-            font-size: 14px;
             color: #666;
-            line-height: 1.5;
-            padding: 0 20px 20px 20px;
-            text-align: center;
+            font-weight: 500;
         }
 
-        .alert-actions {
-            padding: 0 20px 20px 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .alert-btn {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
+        .final-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
             border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 15px;
+            margin-top: 20px;
         }
 
-        .alert-btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .final-warning p {
+            margin: 5px 0;
+            color: #856404;
         }
 
-        .alert-btn-primary:hover {
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-            transform: translateY(-1px);
+        .btn-transfer {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
         }
 
-        .alert-btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-        }
-
-        .alert-btn-secondary:hover {
-            background: #e5e7eb;
-            transform: translateY(-1px);
-        }
-
-        /* 6자리 인증번호 입력 모달 스타일 */
-        .pin-input-section {
-            padding: 20px;
+        .empty-state {
             text-align: center;
+            padding: 40px 20px;
+            color: #666;
         }
 
-        .pin-title {
-            font-size: 16px;
+        /* 내 계좌 항목 스타일 */
+        .my-account-item {
+            position: relative;
+            cursor: not-allowed !important;
+            background: #f8f8f8 !important;
+            border-left: 4px solid #ffc107;
+        }
+
+        .my-account-item:hover {
+            background: #f0f0f0 !important;
+            transform: none !important;
+        }
+
+        .my-account-label {
+            color: #ffc107;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
+            font-size: 11px;
         }
 
-        .pin-display {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0 30px 0;
-        }
-
-        .pin-digit {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+        .primary-account-label {
+            color: #28a745;
             font-weight: 600;
-            color: #333;
-            background: white;
-            transition: all 0.3s ease;
+            font-size: 11px;
         }
 
-        .pin-digit.filled {
-            border-color: #667eea;
-            background: #f0f4ff;
-            color: #667eea;
-        }
-
-        .pin-digit.error {
-            border-color: #ef4444;
-            background: #fef2f2;
-            color: #ef4444;
-            animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            max-width: 300px;
-            margin: 0 auto;
-        }
-
-        .keypad-btn {
-            width: 60px;
-            height: 60px;
-            border: none;
-            border-radius: 50%;
-            background: #f8f9fa;
-            color: #333;
-            font-size: 24px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .keypad-btn:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .keypad-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .keypad-btn.delete {
-            background: #fee2e2;
-            color: #dc2626;
-            font-size: 18px;
-        }
-
-        .keypad-btn.delete:hover {
-            background: #fecaca;
-        }
-
-        .keypad-btn:disabled {
-            background: #f3f4f6;
-            color: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .pin-error-message {
-            color: #ef4444;
-            font-size: 12px;
-            margin-top: 10px;
-            min-height: 16px;
+        .account-note {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -1341,158 +902,83 @@
             <button class="header-back" onclick="goBack()">⌂</button>
         </header>
         
-        <!-- 현재 잔액 카드 -->
-        <div class="balance-card">
-            <div class="balance-card-content">
-                <div class="balance-left">
-                    <div class="balance-label">현재 잔액</div>
-                    <div class="balance-amount" id="currentBalance">로딩 중...</div>
-                    <div class="balance-account" id="currentAccount">계좌번호: 로딩 중...</div>
-                    <div class="balance-info">
-                        <span id="senderBank">은행: 로딩 중</span>
-                        <span class="info-separator">·</span>
-                        <span id="senderName">이름: 로딩 중</span>
+        <div class="content">
+            <!-- 현재 잔액 카드 -->
+            <div class="balance-card" id="balanceCard">
+                <div class="balance-label">현재 잔액</div>
+                <div class="balance-amount" id="currentBalance">로딩 중...</div>
+                <div class="balance-account" id="currentAccount">계좌번호: 로딩 중...</div>
+                <div class="balance-info">
+                    <span id="senderBank">은행: 로딩 중</span>
+                    <span class="info-separator">·</span>
+                    <span id="senderName">이름: 로딩 중</span>
+                </div>
+            </div>
+
+            <!-- 수신자 선택 섹션 -->
+            <div class="recipient-section">
+                <h2 class="section-title">어디로 돈을 보낼까요?</h2>
+                
+                <!-- 탭 버튼 -->
+                <div class="recipient-tabs">
+                    <button class="tab-button active" onclick="switchTab('account')">계좌</button>
+                    <button class="tab-button" onclick="switchTab('contact')">연락처</button>
+                </div>
+
+                <!-- 계좌 탭 내용 -->
+                <div class="tab-content active" id="account-tab">
+                    <!-- 계좌번호 직접 입력 -->
+                    <div class="account-input-section">
+                        <div class="input-group">
+                            <div class="input-with-camera">
+                                <input type="text" class="account-input" id="accountInput" 
+                                       placeholder="계좌번호를 입력하세요" maxlength="20" style="cursor: pointer;"
+                                       onfocus="this.blur(); openAccountModal();" onclick="openAccountModal();">
+                                <button class="camera-button" onclick="openCamera()" title="카메라로 계좌번호 인식">
+                                    📷
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="balance-right">
-                    <div class="receiver-label">받는 사람</div>
-                    <div class="receiver-account" id="receiverAccountDisplay"></div>
-                    <div class="receiver-bank" id="receiverBankDisplay"></div>
-                </div>
-            </div>
-        </div>
 
-        <!-- 수신자 선택 섹션 -->
-        <div class="recipient-section">
-            <h2 class="section-title">어디로 돈을 보낼까요?</h2>
-            
-            <!-- 탭 버튼 -->
-            <div class="recipient-tabs">
-                <button class="tab-button active" onclick="switchTab('account')">계좌</button>
-                <button class="tab-button" onclick="switchTab('contact')">연락처</button>
-            </div>
+                    <!-- 내 계좌 목록 -->
+                    <div class="my-accounts-section">
+                        <button class="accounts-toggle" onclick="toggleMyAccounts()">
+                            <span class="accounts-toggle-text">내 계좌 목록</span>
+                            <span class="accounts-count" id="myAccountsCount">0</span>
+                        </button>
+                        <div class="accounts-list" id="myAccountsList">
+                            <!-- 내 계좌 목록이 여기에 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
 
-            <!-- 계좌 탭 내용 -->
-            <div class="tab-content active" id="account-tab">
-                <!-- 계좌번호 직접 입력 -->
-                <div class="account-input-section">
-                    <div class="input-group">
-                        <div class="input-with-camera">
-                            <input type="text" class="account-input" id="accountInput" 
-                                   placeholder="계좌번호를 입력하세요" maxlength="20" readonly style="cursor: pointer;">
-                            <button class="camera-button" onclick="openCamera()" title="카메라로 계좌번호 인식">
-                                📷
-                            </button>
+                    <!-- 최근 송금 내역 -->
+                    <div class="recent-section">
+                        <h3 class="section-title">최근 송금 계좌</h3>
+                        <div class="search-box">
+                            <input type="text" class="search-input" id="searchInput" 
+                                   placeholder="계좌번호나 이름으로 검색" onkeyup="searchRecentTransfers()">
+                        </div>
+                        <div class="recent-transfers" id="recentTransfers">
+                            <!-- 최근 송금 내역이 여기에 동적으로 추가됩니다 -->
                         </div>
                     </div>
                 </div>
 
-                <!-- 내 계좌 목록 -->
-                <div class="my-accounts-section">
-                    <button class="accounts-toggle" onclick="toggleMyAccounts()">
-                        <span class="accounts-toggle-text">내 계좌 목록</span>
-                        <span class="accounts-count" id="myAccountsCount">0</span>
-                    </button>
-                    <div class="accounts-list" id="myAccountsList">
-                        <!-- 내 계좌 목록이 여기에 동적으로 추가됩니다 -->
-                    </div>
-                </div>
-
-                <!-- 최근 송금 내역 -->
-                <div class="recent-section">
-                    <h3 class="section-title">최근 송금 계좌</h3>
-                    <div class="search-box">
-                        <input type="text" class="search-input" id="searchInput" 
-                               placeholder="계좌번호나 이름으로 검색" onkeyup="searchRecentTransfers()">
-                    </div>
-                    <div class="recent-transfers" id="recentTransfers">
-                        <!-- 최근 송금 내역이 여기에 동적으로 추가됩니다 -->
+                <!-- 연락처 탭 내용 -->
+                <div class="tab-content" id="contact-tab">
+                    <div class="empty-state">
+                        연락처 기능은 추후 추가될 예정입니다.
                     </div>
                 </div>
             </div>
 
-            <!-- 연락처 탭 내용 -->
-            <div class="tab-content" id="contact-tab">
-                <!-- 연락처 입력 섹션 (계좌 탭과 높이 맞춤) -->
-                <div class="account-input-section">
-                    <div class="input-group">
-                        <div class="input-with-camera">
-                            <input type="text" class="account-input" id="contactInput" 
-                                   placeholder="연락처를 입력하세요" maxlength="13" readonly style="cursor: pointer;">
-                            <button class="camera-button" onclick="openContactSearch()" title="연락처 검색">
-                                📞
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 즐겨찾기 연락처 (내 계좌 목록과 동일한 구조) -->
-                <div class="my-accounts-section">
-                    <button class="accounts-toggle" onclick="toggleFavoriteContacts()">
-                        <span class="accounts-toggle-text">즐겨찾기 연락처</span>
-                        <span class="accounts-count" id="favoriteContactsCount">0</span>
-                    </button>
-                    <div class="accounts-list" id="favoriteContactsList">
-                        <!-- 즐겨찾기 연락처가 여기에 동적으로 추가됩니다 -->
-                    </div>
-                </div>
-
-                <!-- 모든 연락처 -->
-                <div class="recent-section">
-                    <h3 class="section-title">연락처 목록</h3>
-                    <div class="search-box">
-                        <input type="text" class="search-input" id="contactSearch" 
-                               placeholder="연락처 검색" onkeyup="searchContacts()">
-                    </div>
-                    <div class="recent-transfers" id="contactList">
-                        <!-- 연락처 목록이 여기에 동적으로 추가됩니다 -->
-                    </div>
-                </div>
+            <!-- 다음 단계 버튼 -->
+            <div class="next-step-section" id="nextStepSection">
+                <button class="next-step-button" onclick="openTransferInfoModal()">
+                    다음 단계
+                </button>
             </div>
-        </div>
-
-        <!-- 송금 폼 -->
-        <form class="transfer-form" id="transferForm">
-            <h2 class="section-title">송금 정보 입력</h2>
-            <div class="form-group">
-                <label class="form-label" for="senderName">받는계좌에 표시</label>
-                <input type="text" class="form-input" id="senderName" 
-                       placeholder="받는 계좌에 표시될 이름" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="receiverDisplay">내계좌에 표시</label>
-                <input type="text" class="form-input" id="receiverDisplay" 
-                       placeholder="받는분 이름표시">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="amount">송금 금액</label>
-                <div class="amount-group">
-                    <input type="text" class="form-input amount-input" id="amount" 
-                           placeholder="송금할 금액을 입력하세요" oninput="formatAmount(this)" required>
-                    <span class="currency-label">원</span>
-                </div>
-                <div class="error-message" id="amountError"></div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="memo">송금 메모 (선택사항)</label>
-                <textarea class="form-input memo-input" id="memo" 
-                          placeholder="송금 목적을 입력하세요 (최대 100자)" maxlength="100"></textarea>
-            </div>
-
-            <div class="loading" id="loading">
-                <div class="loading-spinner"></div>
-                송금 처리 중...
-            </div>
-        </form>
-
-        <!-- 하단 고정 버튼 -->
-        <div class="bottom-section">
-            <button type="submit" class="submit-button" id="submitButton" onclick="handleTransfer()">
-                송금하기
-            </button>
         </div>
     </div>
 
@@ -1503,128 +989,271 @@
                 <h3 class="modal-title">어떤 계좌로 보낼까요?</h3>
                 <button class="modal-close" onclick="closeAccountModal()">×</button>
             </div>
-            <div class="account-input-modal">
-                <input type="text" id="modalAccountInput" placeholder="계좌번호 입력" maxlength="20">
-            </div>
             <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">계좌번호</label>
+                    <input type="text" class="form-input" id="modalAccountInput" 
+                           placeholder="계좌번호 입력" maxlength="20"
+                           oninput="resetAccountVerification()"
+                           onkeypress="handleAccountModalKeyPress(event)">
+                    <div class="verification-status" id="verificationStatus"></div>
+                </div>
+                
                 <div class="bank-section">
                     <div class="section-header">
-                        <span>🏦</span> 은행을 선택해주세요
+                        은행을 선택해주세요
                     </div>
                     <div class="bank-grid" id="bankGrid">
                         <!-- 은행 목록이 여기에 동적으로 추가됩니다 -->
                     </div>
                 </div>
-                
-                <div class="securities-section">
-                    <div class="section-header">
-                        <span>📊</span> 증권사
-                    </div>
-                    <div class="bank-grid" id="securitiesGrid">
-                        <!-- 증권사 목록이 여기에 동적으로 추가됩니다 -->
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
                 <button class="modal-btn modal-btn-cancel" onclick="closeAccountModal()">취소</button>
-                <button class="modal-btn modal-btn-confirm" id="confirmAccountBtn" onclick="confirmAccount()" disabled>확인</button>
+                <button class="modal-btn modal-btn-confirm" id="confirmAccountBtn" onclick="confirmAccountSelection()" disabled>확인</button>
             </div>
         </div>
     </div>
 
-    <!-- 송금 확인 모달 -->
-    <div class="modal-overlay" id="transferConfirmModal">
+    <!-- 송금 정보 입력 모달 -->
+    <div class="modal-overlay" id="transferInfoModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">송금 정보 확인</h3>
-                <button class="modal-close" onclick="closeTransferConfirmModal()">×</button>
+                <h3 class="modal-title">송금 정보 입력</h3>
+                <button class="modal-close" onclick="closeTransferInfoModal()">×</button>
             </div>
             <div class="modal-body">
-                <div class="confirm-section">
-                    <div class="confirm-item">
-                        <label class="confirm-label">받는 사람 계좌번호</label>
-                        <div class="confirm-value" id="confirmAccountNumber">-</div>
+                <!-- 송금 계좌 정보 표시 -->
+                <div class="sender-info-brief">
+                    <div class="account-info-header">
+                        내계좌 정보 <span id="senderAccountName">(내 계좌)</span>
                     </div>
-                    <div class="confirm-item">
-                        <label class="confirm-label">은행</label>
-                        <div class="confirm-value" id="confirmBank">-</div>
-                    </div>
-                    <div class="confirm-item">
-                        <label class="confirm-label">받는 사람 이름</label>
-                        <div class="confirm-value" id="confirmReceiverName">-</div>
-                    </div>
-                    <div class="confirm-item">
-                        <label class="confirm-label">송금 금액</label>
-                        <div class="confirm-value highlight" id="confirmAmount">-</div>
-                    </div>
-                    <div class="confirm-item">
-                        <label class="confirm-label">송금 메모</label>
-                        <div class="confirm-value" id="confirmMemo">-</div>
+                    <div class="account-details">
+                        <div class="account-main-info">
+                            <span id="senderAccountNumber">-</span> (<span id="senderBankName">EasyPay</span>)
+                        </div>
+                        <div class="balance-info">
+                            잔액: <span id="senderAccountBalance">-</span>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- 6자리 인증번호 입력 섹션 -->
-                <div class="pin-input-section">
-                    <div class="pin-title">6자리 인증번호를 입력해주세요</div>
-                    <div class="pin-display">
-                        <div class="pin-digit" id="pin1"></div>
-                        <div class="pin-digit" id="pin2"></div>
-                        <div class="pin-digit" id="pin3"></div>
-                        <div class="pin-digit" id="pin4"></div>
-                        <div class="pin-digit" id="pin5"></div>
-                        <div class="pin-digit" id="pin6"></div>
+                <!-- 받는 계좌 정보 표시 -->
+                <div class="recipient-info-brief">
+                    <div class="account-info-header">
+                        보내는 계좌 정보
                     </div>
-                    <div class="keypad" id="keypad">
-                        <!-- 키패드 버튼들이 JavaScript로 동적으로 생성됩니다 -->
+                    <div class="account-details">
+                        <div class="account-main-info">
+                            <span id="recipientAccountNumber">-</span> (<span id="recipientBankName">-</span>)
+                        </div>
+                        <div class="account-sub-info">
+                            <span id="recipientAccountHolder">-</span>
+                        </div>
                     </div>
-                    <div class="pin-error-message" id="pinErrorMessage"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="modalSenderName">받는계좌에 표시</label>
+                    <input type="text" class="form-input" id="modalSenderName" 
+                           placeholder="받는 계좌에 표시될 이름" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="modalReceiverDisplay">내계좌에 표시</label>
+                    <input type="text" class="form-input" id="modalReceiverDisplay" 
+                           placeholder="내 계좌에 표시될 이름" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="modalAmount">송금 금액</label>
+                    
+                    <!-- 빠른 금액 선택 버튼 -->
+                    <div class="quick-amount-buttons">
+                        <button type="button" class="quick-amount-btn" onclick="setQuickAmount(1000)">1천원</button>
+                        <button type="button" class="quick-amount-btn" onclick="setQuickAmount(10000)">1만원</button>
+                        <button type="button" class="quick-amount-btn" onclick="setQuickAmount(100000)">10만원</button>
+                        <button type="button" class="quick-amount-btn" onclick="setQuickAmount(1000000)">100만원</button>
+                        <button type="button" class="quick-amount-btn" onclick="setQuickAmount(10000000)">1천만원</button>
+                    </div>
+                    
+                    <input type="text" class="form-input amount-input" id="modalAmount" 
+                           placeholder="금액 입력" required
+                           oninput="formatAmountInput(this)" onkeypress="return isNumberKey(event)">
+                    <div class="amount-display" id="amountDisplay"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="modalMemo">메모 (선택)</label>
+                    <input type="text" class="form-input" id="modalMemo" 
+                           placeholder="메모를 입력하세요 (255자)" maxlength="255"
+                           onkeypress="handleTransferInfoKeyPress(event)">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="modal-btn modal-btn-cancel" onclick="closeTransferConfirmModal()">취소</button>
-                <button class="modal-btn modal-btn-confirm" onclick="processTransferConfirm()">송금하기</button>
+                <button class="modal-btn modal-btn-cancel" onclick="closeTransferInfoModal()">취소</button>
+                <button class="modal-btn modal-btn-confirm" onclick="proceedToPinVerification()">다음</button>
             </div>
         </div>
     </div>
 
-    <!-- 공통 Alert 모달 -->
-    <div class="alert-overlay" id="alertModal">
-        <div class="alert-content">
-            <div class="alert-header">
-                <span class="alert-icon" id="alertIcon">ℹ️</span>
-                <div class="alert-title" id="alertTitle">알림</div>
+    <!-- PIN 입력 모달 -->
+    <div class="modal-overlay" id="pinModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">PIN 번호 입력</h3>
+                <button class="modal-close" onclick="closePinModal()">×</button>
             </div>
-            <div class="alert-message" id="alertMessage">메시지가 여기에 표시됩니다.</div>
-            <div class="alert-actions">
-                <button class="alert-btn alert-btn-secondary" id="alertCancelBtn" onclick="closeAlert()" style="display: none;">취소</button>
-                <button class="alert-btn alert-btn-primary" id="alertConfirmBtn" onclick="closeAlert()">확인</button>
+            <div class="modal-body">
+                <div class="form-group">
+                    <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                        송금을 위해 PIN 번호를 입력해주세요
+                    </p>
+                    <input type="password" class="form-input" id="modalPin" 
+                           placeholder="PIN 번호 6자리" maxlength="6" required 
+                           style="text-align: center; font-size: 18px; letter-spacing: 3px;"
+                           onkeypress="handlePinKeyPress(event)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closePinModal()">취소</button>
+                <button class="modal-btn modal-btn-confirm" onclick="verifyPinAndProceed()">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 최종 확인 모달 -->
+    <div class="modal-overlay" id="finalConfirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">송금 최종 확인</h3>
+                <button class="modal-close" onclick="closeFinalConfirmModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-info">
+                    <div class="confirm-item">
+                        <label class="confirm-label">받는 사람</label>
+                        <span class="confirm-value" id="finalReceiverName"></span>
+                    </div>
+                    <div class="confirm-item">
+                        <label class="confirm-label">받는 계좌번호</label>
+                        <span class="confirm-value" id="finalReceiverAccount"></span>
+                    </div>
+                    <div class="confirm-item">
+                        <label class="confirm-label">송금 금액</label>
+                        <span class="confirm-value" id="finalAmount"></span>
+                    </div>
+                    <div class="confirm-item">
+                        <label class="confirm-label">메모</label>
+                        <span class="confirm-value" id="finalMemo"></span>
+                    </div>
+                </div>
+                <div class="final-warning">
+                    <p><strong>⚠️ 송금 후에는 취소할 수 없습니다.</strong></p>
+                    <p>위 정보가 정확한지 다시 한번 확인해주세요.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeFinalConfirmModal()">취소</button>
+                <button class="modal-btn modal-btn-confirm btn-transfer" onclick="executeTransfer()">송금하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 송금 완료 메시지 모달 -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content success-modal">
+            <div class="success-icon">
+                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="30" cy="30" r="30" fill="#28a745"/>
+                    <path d="m16 30 8 8 16-16" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3 class="success-title">송금 완료</h3>
+            <div class="success-content">
+                <div class="success-item">
+                    <span class="success-label">받는 사람:</span>
+                    <span class="success-value" id="successReceiverName">-</span>
+                </div>
+                <div class="success-item">
+                    <span class="success-label">송금액:</span>
+                    <span class="success-value" id="successAmount">-</span>
+                </div>
+                <div class="success-item">
+                    <span class="success-label">계좌번호:</span>
+                    <span class="success-value" id="successAccountNumber">-</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-confirm" onclick="closeSuccessModal()">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 에러 메시지 모달 -->
+    <div class="modal-overlay" id="errorModal">
+        <div class="modal-content error-modal">
+            <div class="error-icon">
+                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="30" cy="30" r="30" fill="#dc3545"/>
+                    <path d="m18 18 24 24M42 18 18 42" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3 class="error-title">송금 실패</h3>
+            <div class="error-content">
+                <p class="error-message" id="errorMessage">-</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-confirm" onclick="closeErrorModal()">확인</button>
             </div>
         </div>
     </div>
 
     <script>
+        console.log('=== Transfer Page Fixed Version 로드 ===');
+        
         // 전역 변수
+        let selectedAccountInfo = {
+            accountNumber: '',
+            bank: '',
+            accountHolderName: '',
+            isVerified: false
+        };
+        let selectedSenderAccount = {
+            accountNumber: '',
+            accountName: '',
+            balance: 0
+        };
         let currentUser = null;
+        let pinSessionToken = null;
         let myAccounts = [];
         let recentTransfers = [];
-        let contacts = [];
-        let favorites = JSON.parse(localStorage.getItem('transferFavorites') || '[]');
-        let favoriteContactList = JSON.parse(localStorage.getItem('favoriteContacts') || '[]');
-        let selectedBank = null;
-        let modalAccountNumber = '';
-        
-        // 인증번호 관련 변수
-        let currentPin = '';
-        let registeredPin = '123456'; // 실제로는 서버에서 가져오거나 사용자가 등록한 PIN
-        let keypadNumbers = [];
-        let alertCallback = null;
-        let pinAuthCallback = null;
-        let pinAuthType = '';
-        let pinMaxAttempts = 5;
-        let pinCurrentAttempts = 0;
+        let banks = [
+            // EasyPay 은행
+            'EasyPay',
+            
+            // 주요 시중은행
+            '국민은행', '신한은행', '우리은행', '하나은행', 'KB국민은행', 
+            'NH농협은행', 'IBK기업은행', '수협은행', '우체국예금보험', 
+            '대구은행', '부산은행', '경남은행', '광주은행', '전북은행', '제주은행',
+            
+            // 인터넷은행
+            '카카오뱅크', '토스뱅크', 'K뱅크',
+            
+            // 외국계은행
+            '씨티은행', 'SC제일은행', 'HSBC은행', 
+            
+            // 증권사
+            '미래에셋증권', '삼성증권', 'NH투자증권', '키움증권', '한국투자증권',
+            '대신증권', '하이투자증권', '교보증권', '유진투자증권', '이베스트투자증권',
+            '신한투자증권', '하나증권', '메리츠증권', '유안타증권', '현대차증권',
+            '케이프투자증권', '부국증권', '한화투자증권', '토스증권'
+        ];
 
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM 로드 완료, 초기화 시작...');
+            
             // 서버에서 클라이언트 설정 로드
             await loadClientConfig();
             
@@ -1641,284 +1270,184 @@
             loadUserInfo();
             loadMyAccounts();
             loadRecentTransfers();
-            loadContacts();
             initializeBankData();
-            initializeKeypad();
+            
+            // 계좌 잔액 업데이트 이벤트 리스너 추가
+            window.addEventListener('accountBalanceUpdated', function() {
+                console.log('계좌 잔액 업데이트 이벤트 수신, 송금 페이지 새로고침');
+                loadBalance(); // 잔액 카드 새로고침
+                loadMyAccounts(); // 내 계좌 목록 새로고침
+            });
             
             // 계좌번호 입력 필드 클릭 이벤트
             const accountInput = document.getElementById('accountInput');
+            console.log('accountInput 요소 찾기:', accountInput);
+            
             if (accountInput) {
-                accountInput.addEventListener('click', function(e) {
+                // 키보드 입력 방지 (모달을 통해서만 입력받기)
+                accountInput.addEventListener('keydown', function(e) {
                     e.preventDefault();
                     openAccountModal();
+                    return false;
                 });
-            }
-        });
-
-        // 공통 Alert 함수들
-        function showAlert(message, type = 'info', title = '알림', showCancel = false, callback = null) {
-            const alertModal = document.getElementById('alertModal');
-            const alertIcon = document.getElementById('alertIcon');
-            const alertTitle = document.getElementById('alertTitle');
-            const alertMessage = document.getElementById('alertMessage');
-            const alertCancelBtn = document.getElementById('alertCancelBtn');
-            const alertConfirmBtn = document.getElementById('alertConfirmBtn');
-            
-            // 아이콘 설정
-            const icons = {
-                success: '✅',
-                error: '❌',
-                warning: '⚠️',
-                info: 'ℹ️'
-            };
-            
-            alertIcon.textContent = icons[type] || icons.info;
-            alertIcon.className = `alert-icon ${type}`;
-            alertTitle.textContent = title;
-            alertMessage.textContent = message;
-            
-            // 취소 버튼 표시/숨김
-            if (showCancel) {
-                alertCancelBtn.style.display = 'block';
+                
+                // 붙여넣기 방지
+                accountInput.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    openAccountModal();
+                    return false;
+                });
+                
+                console.log('계좌번호 입력 필드 이벤트 등록 완료');
+                
+                // 추가 테스트: 요소가 클릭 가능한지 확인
+                console.log('accountInput 속성 확인:');
+                console.log('  - readonly:', accountInput.readOnly);
+                console.log('  - disabled:', accountInput.disabled);
+                console.log('  - style.cursor:', window.getComputedStyle(accountInput).cursor);
+                console.log('  - onclick 속성:', accountInput.getAttribute('onclick'));
             } else {
-                alertCancelBtn.style.display = 'none';
+                console.error('accountInput 요소를 찾을 수 없습니다!');
             }
             
-            // 콜백 함수 저장
-            alertCallback = callback;
-            
-            // 모달 표시
-            alertModal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeAlert(confirmed = true) {
-            const alertModal = document.getElementById('alertModal');
-            alertModal.classList.remove('show');
-            document.body.style.overflow = '';
-            
-            // 콜백 실행
-            if (alertCallback && typeof alertCallback === 'function') {
-                alertCallback(confirmed);
-                alertCallback = null;
+            // 모달 계좌번호 입력 이벤트
+            const modalAccountInput = document.getElementById('modalAccountInput');
+            if (modalAccountInput) {
+                modalAccountInput.addEventListener('input', function(e) {
+                    const accountNumber = e.target.value.trim();
+                    selectedAccountInfo.accountNumber = accountNumber;
+                    
+                    // 입력 시 이전 검증 상태 초기화
+                    resetAccountVerification();
+                    
+                    // 확인 버튼 상태 업데이트
+                    updateConfirmButton();
+                });
+                console.log('모달 계좌번호 입력 이벤트 등록 완료');
+            } else {
+                console.warn('modalAccountInput 요소를 찾을 수 없습니다');
             }
-        }
-
-        // 기존 alert를 showAlert로 대체하는 함수
-        function customAlert(message) {
-            showAlert(message, 'info');
-        }
-
-        // 공통 PIN 인증 함수
-        function showPinAuthentication(type, options = {}, callback) {
-            pinAuthType = type;
-            pinAuthCallback = callback;
-            pinMaxAttempts = options.maxAttempts || 5;
-            pinCurrentAttempts = 0;
             
-            // 타입별 제목 설정
-            const titles = {
-                transfer: '송금 인증번호 입력',
-                payment: '결제 인증번호 입력',
-                common: '보안 인증번호 입력'
-            };
-            
-            const title = options.title || titles[type] || titles.common;
-            
-            // PIN 제목 업데이트
-            document.querySelector('.pin-title').textContent = title + '\n(6자리를 입력해주세요)';
-            
-            // 송금 확인 모달 표시 (PIN 인증 UI 포함)
-            document.getElementById('transferConfirmModal').classList.add('show');
-            document.body.style.overflow = 'hidden';
-            
-            // PIN 초기화 및 키패드 재생성
-            clearPin();
-            initializeKeypad();
-        }
-
-        // 공통 PIN 인증 성공 처리
-        function onPinAuthSuccess() {
-            showAlert(`${getPinTypeTitle()} 인증이 완료되었습니다.`, 'success', '인증 성공', false, () => {
-                closeTransferConfirmModal();
-                if (pinAuthCallback && typeof pinAuthCallback === 'function') {
-                    pinAuthCallback(true);
+            // ESC 키로 모달 닫기
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('accountModal');
+                    if (modal && modal.style.display === 'flex') {
+                        closeAccountModal();
+                    }
                 }
             });
-        }
-
-        // 공통 PIN 인증 실패 처리
-        function onPinAuthFailed(message = '인증번호가 일치하지 않습니다.') {
-            pinCurrentAttempts++;
+            console.log('ESC 키 이벤트 등록 완료');
             
-            if (pinCurrentAttempts >= pinMaxAttempts) {
-                showAlert(`인증 실패 횟수가 초과되었습니다.\n잠시 후 다시 시도해주세요.`, 'error', '인증 실패', false, () => {
-                    closeTransferConfirmModal();
-                    if (pinAuthCallback && typeof pinAuthCallback === 'function') {
-                        pinAuthCallback(false);
+            // 모달 오버레이 클릭 시 모달 닫기
+            const modalOverlay = document.getElementById('accountModal');
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === modalOverlay) {
+                        closeAccountModal();
                     }
                 });
+                console.log('모달 오버레이 클릭 이벤트 등록 완료');
             } else {
-                const remainingAttempts = pinMaxAttempts - pinCurrentAttempts;
-                showPinError(`${message}\n(남은 시도: ${remainingAttempts}회)`);
-                clearPin();
+                console.warn('modalOverlay(accountModal) 요소를 찾을 수 없습니다');
             }
-        }
-
-        // PIN 타입별 제목 반환
-        function getPinTypeTitle() {
-            const titles = {
-                transfer: '송금',
-                payment: '결제',
-                common: '보안'
-            };
-            return titles[pinAuthType] || '보안';
-        }
-
-        // 랜덤 키패드 초기화
-        function initializeKeypad() {
-            // 0-9 숫자를 랜덤하게 섞기
-            keypadNumbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-            shuffleArray(keypadNumbers);
-            renderKeypad();
-        }
-
-        // 배열 섞기 함수
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        // 키패드 렌더링
-        function renderKeypad() {
-            const keypad = document.getElementById('keypad');
-            keypad.innerHTML = '';
-            
-            // 9개 숫자 버튼 (3x3)
-            for (let i = 0; i < 9; i++) {
-                const button = document.createElement('button');
-                button.className = 'keypad-btn';
-                button.textContent = keypadNumbers[i];
-                button.onclick = () => inputPin(keypadNumbers[i]);
-                keypad.appendChild(button);
-            }
-            
-            // 빈 공간
-            const emptyBtn = document.createElement('button');
-            emptyBtn.className = 'keypad-btn';
-            emptyBtn.disabled = true;
-            emptyBtn.style.visibility = 'hidden';
-            keypad.appendChild(emptyBtn);
-            
-            // 마지막 숫자 (보통 0)
-            const lastButton = document.createElement('button');
-            lastButton.className = 'keypad-btn';
-            lastButton.textContent = keypadNumbers[9];
-            lastButton.onclick = () => inputPin(keypadNumbers[9]);
-            keypad.appendChild(lastButton);
-            
-            // 삭제 버튼
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'keypad-btn delete';
-            deleteBtn.innerHTML = '⌫';
-            deleteBtn.onclick = () => deletePin();
-            keypad.appendChild(deleteBtn);
-        }
-
-        // PIN 입력
-        function inputPin(number) {
-            if (currentPin.length < 6) {
-                currentPin += number.toString();
-                updatePinDisplay();
-                
-                // 6자리가 모두 입력되면 자동으로 확인
-                if (currentPin.length === 6) {
-                    setTimeout(() => {
-                        verifyPin();
-                    }, 300);
-                }
-            }
-        }
-
-        // PIN 삭제
-        function deletePin() {
-            if (currentPin.length > 0) {
-                currentPin = currentPin.slice(0, -1);
-                updatePinDisplay();
-                clearPinError();
-            }
-        }
-
-        // PIN 표시 업데이트
-        function updatePinDisplay() {
-            for (let i = 1; i <= 6; i++) {
-                const pinDigit = document.getElementById(`pin${i}`);
-                if (i <= currentPin.length) {
-                    pinDigit.textContent = '●';
-                    pinDigit.classList.add('filled');
-                    pinDigit.classList.remove('error');
-                } else {
-                    pinDigit.textContent = '';
-                    pinDigit.classList.remove('filled', 'error');
-                }
-            }
-        }
-
-        // PIN 확인
-        function verifyPin() {
-            if (currentPin === registeredPin) {
-                // 인증 성공
-                onPinAuthSuccess();
-            } else {
-                // 인증 실패
-                onPinAuthFailed();
-            }
-        }
-
-        // PIN 에러 표시
-        function showPinError(message) {
-            const errorElement = document.getElementById('pinErrorMessage');
-            errorElement.textContent = message;
-            
-            // PIN 입력창에 에러 스타일 적용
-            for (let i = 1; i <= 6; i++) {
-                const pinDigit = document.getElementById(`pin${i}`);
-                pinDigit.classList.add('error');
-            }
-        }
-
-        // PIN 에러 클리어
-        function clearPinError() {
-            const errorElement = document.getElementById('pinErrorMessage');
-            errorElement.textContent = '';
-            
-            // PIN 입력창에서 에러 스타일 제거
-            for (let i = 1; i <= 6; i++) {
-                const pinDigit = document.getElementById(`pin${i}`);
-                pinDigit.classList.remove('error');
-            }
-        }
-
-        // PIN 초기화
-        function clearPin() {
-            currentPin = '';
-            updatePinDisplay();
-            // 키패드 재섞기
-            setTimeout(() => {
-                initializeKeypad();
-            }, 1000);
-        }
+        });
 
         // 인증 확인
         function checkAuth() {
             const token = localStorage.getItem('accessToken');
             if (!token) {
-                showAlert('로그인이 필요합니다.', 'warning', '로그인 필요', false, () => {
-                    window.location.href = '/index.html';
-                });
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login.html';
                 return;
+            }
+        }
+
+        // 잔액 조회 (기본 계좌 사용)
+        async function loadBalance() {
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                console.log('EasyPay 계좌 목록 조회 시작...');
+                const response = await fetch('/api/user-accounts', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const accounts = result.accounts || [];
+                    
+                    // 기본 계좌 찾기 (isPrimary가 true인 계좌)
+                    const primaryAccount = accounts.find(account => account.isPrimary);
+                    
+                    if (primaryAccount) {
+                        const balance = primaryAccount.balance || 0;
+                        const accountNumber = primaryAccount.accountNumber || 'N/A';
+                        const accountName = primaryAccount.accountName || '기본계좌';
+                        
+                        console.log('기본 계좌 조회 성공:', { balance, accountNumber, accountName });
+                        
+                        // 기본 계좌를 선택된 송금 계좌로 설정
+                        selectedSenderAccount = {
+                            accountNumber: accountNumber,
+                            accountName: accountName,
+                            balance: balance
+                        };
+                        
+                        // 잔액 표시
+                        document.getElementById('currentBalance').textContent = 
+                            new Intl.NumberFormat('ko-KR').format(balance) + '원';
+                        document.getElementById('currentAccount').textContent = 
+                            `${accountName}: ${accountNumber}`;
+                        
+                        // 잔액에 따른 카드 색상 변경
+                        const balanceCard = document.getElementById('balanceCard');
+                        const tier = getBalanceTier(balance);
+                        
+                        // 기존 티어 클래스 제거
+                        balanceCard.classList.remove('tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-vip');
+                        // 새 티어 클래스 추가
+                        balanceCard.classList.add(tier);
+                        console.log('카드 색상 업데이트 완료:', tier);
+                    } else if (accounts.length > 0) {
+                        // 기본 계좌가 없으면 첫 번째 계좌 사용
+                        const firstAccount = accounts[0];
+                        const balance = firstAccount.balance || 0;
+                        const accountNumber = firstAccount.accountNumber || 'N/A';
+                        const accountName = firstAccount.accountName || '계좌';
+                        
+                        console.log('첫 번째 계좌 사용:', { balance, accountNumber, accountName });
+                        
+                        selectedSenderAccount = {
+                            accountNumber: accountNumber,
+                            accountName: accountName,
+                            balance: balance
+                        };
+                        
+                        document.getElementById('currentBalance').textContent = 
+                            new Intl.NumberFormat('ko-KR').format(balance) + '원';
+                        document.getElementById('currentAccount').textContent = 
+                            `${accountName}: ${accountNumber}`;
+                            
+                        const balanceCard = document.getElementById('balanceCard');
+                        const tier = getBalanceTier(balance);
+                        balanceCard.classList.remove('tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-vip');
+                        balanceCard.classList.add(tier);
+                    } else {
+                        console.log('계좌가 없음');
+                        document.getElementById('currentBalance').textContent = '계좌 없음';
+                        document.getElementById('currentAccount').textContent = '계좌를 생성해주세요';
+                    }
+                } else {
+                    console.error('계좌 목록 조회 실패:', response.status);
+                    document.getElementById('currentBalance').textContent = '조회 실패';
+                    document.getElementById('currentAccount').textContent = '';
+                }
+            } catch (error) {
+                console.error('잔액 조회 오류:', error);
+                document.getElementById('currentBalance').textContent = '오류 발생';
             }
         }
 
@@ -1937,47 +1466,6 @@
             }
         }
 
-        // 잔액 조회
-        async function loadBalance() {
-            const token = localStorage.getItem('accessToken');
-            
-            try {
-                const response = await fetch('/accounts/balance', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const balance = data.balance || 0;
-                    const accountNumber = data.accountNumber || 'N/A';
-                    
-                    // 잔액 표시
-                    document.getElementById('currentBalance').textContent = 
-                        new Intl.NumberFormat('ko-KR').format(balance) + '원';
-                    document.getElementById('currentAccount').textContent = 
-                        `계좌번호: ${accountNumber}`;
-                    
-                    // 잔액에 따른 카드 색상 변경
-                    const balanceCard = document.querySelector('.balance-card');
-                    const tier = getBalanceTier(balance);
-                    
-                    // 기존 티어 클래스 제거
-                    balanceCard.classList.remove('tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-vip');
-                    // 새 티어 클래스 추가
-                    balanceCard.classList.add(tier);
-                    
-                } else {
-                    document.getElementById('currentBalance').textContent = '조회 실패';
-                    document.getElementById('currentAccount').textContent = '';
-                }
-            } catch (error) {
-                console.error('Balance load error:', error);
-                document.getElementById('currentBalance').textContent = '조회 실패';
-            }
-        }
-        
         // 사용자 정보 로드
         async function loadUserInfo() {
             const token = localStorage.getItem('accessToken');
@@ -1985,129 +1473,238 @@
             try {
                 // JWT 토큰에서 사용자 정보 추출
                 const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                const phoneNumber = tokenPayload.sub; // 전화번호가 subject로 저장됨
+                const phoneNumber = tokenPayload.sub;
                 
-                // 로컬스토리지에서 사용자 이름 가져오기 (실제로는 API 호출)
-                const userName = localStorage.getItem('userName') || '사용자';
-                const bankName = 'EasyPay'; // 기본 은행
-                
-                // 사용자 이름을 기본값으로 설정
-                const senderNameInput = document.getElementById('senderName');
-                if (senderNameInput && !senderNameInput.value) {
-                    senderNameInput.value = userName;
-                }
+                // 사용자 이름 가져오기
+                const userName = '테스트사용자1'; // 기본값
+                const bankName = 'EasyPay';
                 
                 // 잔액 카드에 정보 표시
-                document.getElementById('senderBank').textContent = `은행: ${bankName}`;
-                document.getElementById('senderName').textContent = `이름: ${userName}`;
+                const senderBankElement = document.getElementById('senderBank');
+                const senderNameElement = document.getElementById('senderName');
+                
+                if (senderBankElement) {
+                    senderBankElement.textContent = `은행: ${bankName}`;
+                }
+                if (senderNameElement) {
+                    senderNameElement.textContent = `이름: ${userName}`;
+                }
+
+                currentUser = { name: userName };
+                console.log('사용자 정보 로드 완료:', currentUser);
             } catch (error) {
                 console.error('사용자 정보 로드 실패:', error);
             }
         }
 
-        // 내 계좌 목록 로드 (모의 데이터)
-        function loadMyAccounts() {
-            // 실제로는 서버에서 가져올 데이터
-            myAccounts = [
-                { bank: 'EasyPay', accountNumber: 'VA12345678', balance: 150000 },
-                { bank: '국민은행', accountNumber: '123-45-678901', balance: 250000 },
-                { bank: '신한은행', accountNumber: '987-65-432109', balance: 180000 }
-            ];
-
-            document.getElementById('myAccountsCount').textContent = myAccounts.length;
-            renderMyAccounts();
+        // 내 계좌 목록 로드
+        async function loadMyAccounts() {
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                // 실제 다중 계좌 API 사용
+                const response = await fetch('/api/user-accounts', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success && result.accounts) {
+                        myAccounts = result.accounts.map(account => ({
+                            accountNumber: account.accountNumber,
+                            accountName: account.accountName,
+                            balance: account.balance || 0,
+                            isPrimary: account.isPrimary,
+                            bank: 'EasyPay'
+                        }));
+                    } else {
+                        myAccounts = [];
+                    }
+                    
+                    document.getElementById('myAccountsCount').textContent = myAccounts.length;
+                    renderMyAccounts();
+                    console.log('내 계좌 목록 로드 완료:', myAccounts);
+                } else {
+                    console.error('계좌 정보 조회 실패:', response.status);
+                    myAccounts = [];
+                    document.getElementById('myAccountsCount').textContent = '0';
+                }
+            } catch (error) {
+                console.error('계좌 정보 로드 오류:', error);
+                myAccounts = [];
+                document.getElementById('myAccountsCount').textContent = '0';
+            }
         }
 
         // 내 계좌 목록 렌더링
         function renderMyAccounts() {
             const container = document.getElementById('myAccountsList');
+            if (myAccounts.length === 0) {
+                container.innerHTML = '<div class="empty-state">등록된 계좌가 없습니다.</div>';
+                return;
+            }
+
             container.innerHTML = myAccounts.map(account => `
-                <div class="account-item" onclick="selectMyAccount('${account.accountNumber}', '${account.bank}')">
-                    <div class="account-info">${account.bank}</div>
+                <div class="account-item" onclick="selectSenderAccount('${account.accountNumber}', '${account.accountName}', ${account.balance})">
+                    <div class="account-info">
+                        ${account.accountName || account.bank}
+                        ${account.isPrimary ? '<span class="primary-account-label">(주계좌)</span>' : ''}
+                    </div>
                     <div class="account-number">${account.accountNumber} (${new Intl.NumberFormat('ko-KR').format(account.balance)}원)</div>
+                    <div class="account-note">※ 이 계좌로 송금합니다</div>
                 </div>
             `).join('');
         }
 
-        // 최근 송금 내역 로드 (모의 데이터)
-        function loadRecentTransfers() {
-            // 실제로는 서버에서 가져올 데이터 (최대 15개)
-            recentTransfers = [
-                { id: 1, name: '김철수', bank: '국민은행', accountNumber: '123-45-678901', lastAmount: 50000, date: '2024-01-15' },
-                { id: 2, name: '박영희', bank: '신한은행', accountNumber: '987-65-432109', lastAmount: 30000, date: '2024-01-14' },
-                { id: 3, name: '이민수', bank: '우리은행', accountNumber: '555-66-777888', lastAmount: 100000, date: '2024-01-13' },
-                { id: 4, name: '정수진', bank: '하나은행', accountNumber: '111-22-333444', lastAmount: 75000, date: '2024-01-12' },
-                { id: 5, name: '최동훈', bank: 'KB국민은행', accountNumber: '999-88-777666', lastAmount: 25000, date: '2024-01-11' }
-            ];
-
-            // 즐겨찾기 정보가 로드된 후 렌더링 (페이지 로드 시에도 즐겨찾기 순서 적용)
-            console.log('로드된 즐겨찾기:', favorites);
-            renderRecentTransfers(recentTransfers);
+        // 최근 송금 내역 로드
+        async function loadRecentTransfers() {
+            const token = localStorage.getItem('accessToken');
+            
+            try {
+                const response = await fetch(`/api/transfers/recent?size=15&sort=createdAt,desc&_t=${Date.now()}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.data && result.data.content) {
+                        recentTransfers = result.data.content.map(transfer => ({
+                            id: transfer.id,
+                            name: transfer.receiverName || '받는분',
+                            bank: 'EasyPay',
+                            accountNumber: transfer.receiverAccountNumber,
+                            lastAmount: transfer.amount,
+                            date: new Date(transfer.createdAt).toLocaleDateString('ko-KR'),
+                            memo: transfer.memo || ''
+                        }));
+                        
+                        renderRecentTransfers();
+                        console.log('최근 송금 내역 로드 완료:', recentTransfers);
+                        console.log('첫 번째 거래의 메모:', recentTransfers[0]?.memo);
+                    } else {
+                        console.log('최근 송금 내역이 없습니다');
+                        recentTransfers = [];
+                        renderRecentTransfers();
+                    }
+                } else {
+                    console.error('송금 내역 조회 실패:', response.status);
+                    recentTransfers = [];
+                    renderRecentTransfers();
+                }
+            } catch (error) {
+                console.error('송금 내역 로드 오류:', error);
+                recentTransfers = [];
+                renderRecentTransfers();
+            }
         }
 
         // 최근 송금 내역 렌더링
-        function renderRecentTransfers(transfers) {
+        function renderRecentTransfers() {
+            console.log('=== renderRecentTransfers 호출 ===');
+            console.log('recentTransfers 데이터:', recentTransfers);
+            
             const container = document.getElementById('recentTransfers');
-            if (transfers.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">최근 송금 내역이 없습니다.</div>';
+            if (recentTransfers.length === 0) {
+                container.innerHTML = '<div class="empty-state">최근 송금 내역이 없습니다.</div>';
                 return;
             }
 
-            // 즐겨찾기된 항목을 상단에, 나머지를 하단에 배치
-            const favoriteTransfers = transfers.filter(transfer => favorites.includes(transfer.id));
-            const regularTransfers = transfers.filter(transfer => !favorites.includes(transfer.id));
-            const sortedTransfers = [...favoriteTransfers, ...regularTransfers];
-
-            container.innerHTML = sortedTransfers.map(transfer => `
+            const html = recentTransfers.map((transfer, index) => {
+                console.log(`거래 ${index + 1}: 이름=${transfer.name}, 메모="${transfer.memo}"`);
+                const memoHtml = transfer.memo ? `<div class="transfer-memo">"${transfer.memo}"</div>` : '';
+                console.log(`메모 HTML: ${memoHtml}`);
+                
+                return `
                 <div class="transfer-item" onclick="selectRecentTransfer('${transfer.accountNumber}', '${transfer.name}', '${transfer.bank}')">
-                    <div class="transfer-info">
-                        <div class="transfer-name">${transfer.name}</div>
-                        <div class="transfer-details">${transfer.bank} ${transfer.accountNumber}</div>
+                    <div class="transfer-name">${transfer.name}</div>
+                    <div class="transfer-details">
+                        <span>${transfer.bank} ${transfer.accountNumber}</span>
+                        <span>${new Intl.NumberFormat('ko-KR').format(transfer.lastAmount)}원 (${transfer.date})</span>
                     </div>
-                    <button class="favorite-btn ${favorites.includes(transfer.id) ? 'active' : ''}" 
-                            onclick="toggleFavorite(event, ${transfer.id})">★</button>
-                </div>
-            `).join('');
+                    ${memoHtml}
+                </div>`;
+            }).join('');
+            
+            console.log('최종 HTML:', html);
+            container.innerHTML = html;
         }
 
-        // 연락처 로드 (모의 데이터)
-        function loadContacts() {
-            // 실제로는 연락처 API에서 가져올 데이터
-            contacts = [
-                { id: 1, name: '김철수', phone: '010-1234-5678', bank: '국민은행', accountNumber: '123-45-678901' },
-                { id: 2, name: '박영희', phone: '010-2345-6789', bank: '신한은행', accountNumber: '987-65-432109' },
-                { id: 3, name: '이민수', phone: '010-3456-7890', bank: '우리은행', accountNumber: '555-66-777888' }
-            ];
-
-            // 즐겨찾기 연락처 카운트 업데이트
-            updateFavoriteContactsCount();
-            renderFavoriteContacts();
-            renderContacts(contacts);
-        }
-
-        // 연락처 렌더링
-        function renderContacts(contactList) {
-            const container = document.getElementById('contactList');
-            if (contactList.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">연락처가 없습니다.</div>';
-                return;
-            }
-
-            // 즐겨찾기된 연락처를 상단에, 나머지를 하단에 배치
-            const favoriteContacts = contactList.filter(contact => favoriteContactList.includes(contact.id));
-            const regularContacts = contactList.filter(contact => !favoriteContactList.includes(contact.id));
-            const sortedContacts = [...favoriteContacts, ...regularContacts];
-
-            container.innerHTML = sortedContacts.map(contact => `
-                <div class="transfer-item" onclick="selectContact('${contact.phone}', '${contact.name}')">
-                    <div class="transfer-info">
-                        <div class="transfer-name">${contact.name}</div>
-                        <div class="transfer-details">${contact.phone}</div>
+        // 은행 데이터 초기화
+        function initializeBankData() {
+            const bankGrid = document.getElementById('bankGrid');
+            
+            // 카테고리별로 은행 분류 (아이콘 추가)
+            const categories = {
+                'EasyPay': [
+                    { name: 'EasyPay', icon: '💳' }
+                ],
+                '주요은행': [
+                    { name: 'KB국민은행', icon: '🏦' },
+                    { name: '신한은행', icon: '🔵' },
+                    { name: '우리은행', icon: '🟢' },
+                    { name: '하나은행', icon: '🌿' },
+                    { name: 'NH농협은행', icon: '🌾' },
+                    { name: 'IBK기업은행', icon: '🏢' },
+                    { name: '수협은행', icon: '🐟' },
+                    { name: '우체국예금보험', icon: '📬' }
+                ],
+                '인터넷은행': [
+                    { name: '카카오뱅크', icon: '🟡' },
+                    { name: '토스뱅크', icon: '💙' },
+                    { name: '케이뱅크', icon: '🟨' }
+                ],
+                '지역은행': [
+                    { name: '대구은행', icon: '🏛️' },
+                    { name: '부산은행', icon: '🌊' },
+                    { name: '경남은행', icon: '🏔️' },
+                    { name: '광주은행', icon: '☀️' },
+                    { name: '전북은행', icon: '🌲' },
+                    { name: '제주은행', icon: '🍊' }
+                ],
+                '외국계은행': [
+                    { name: '씨티은행', icon: '🇺🇸' },
+                    { name: 'SC제일은행', icon: '🇬🇧' },
+                    { name: 'HSBC은행', icon: '🇭🇰' }
+                ],
+                '주요 증권사': [
+                    { name: '미래에셋증권', icon: '📊' },
+                    { name: '삼성증권', icon: '💹' },
+                    { name: 'NH투자증권', icon: '📈' },
+                    { name: '키움증권', icon: '💰' },
+                    { name: '한국투자증권', icon: '🔴' },
+                    { name: '대신증권', icon: '🟠' }
+                ]
+            };
+            
+            let html = '';
+            
+            Object.entries(categories).forEach(([categoryName, categoryBanks]) => {
+                html += `
+                    <div class="bank-category">
+                        <div class="category-header">${categoryName}</div>
+                        <div class="category-grid">
+                            ${categoryBanks.map(bank => `
+                                <div class="bank-item" data-bank="${bank.name}" onclick="selectBank('${bank.name}', this)">
+                                    <span class="bank-icon">${bank.icon}</span>
+                                    <span class="bank-name">${bank.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
-                    <button class="favorite-btn ${favoriteContactList.includes(contact.id) ? 'active' : ''}" 
-                            onclick="toggleContactFavorite(event, ${contact.id})">★</button>
-                </div>
-            `).join('');
+                `;
+            });
+            
+            bankGrid.innerHTML = html;
+            console.log('은행 목록 초기화 완료');
         }
 
         // 탭 전환
@@ -2120,387 +1717,730 @@
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             document.getElementById(tabName + '-tab').classList.add('active');
 
-            // 선택된 수신자 초기화
-            document.getElementById('selectedRecipient').value = '';
+            console.log('탭 전환:', tabName);
         }
 
         // 내 계좌 목록 토글
         function toggleMyAccounts() {
-            const list = document.getElementById('myAccountsList');
-            list.classList.toggle('expanded');
+            const accountsList = document.getElementById('myAccountsList');
+            accountsList.classList.toggle('show');
         }
 
-        // 내 계좌 선택
-        function selectMyAccount(accountNumber, bank) {
-            document.getElementById('accountInput').value = `${accountNumber} (${bank})`;
-            toggleMyAccounts(); // 목록 닫기
+        // 송금 계좌 선택
+        function selectSenderAccount(accountNumber, accountName, balance) {
+            selectedSenderAccount = {
+                accountNumber: accountNumber,
+                accountName: accountName,
+                balance: balance
+            };
+            
+            // 선택한 계좌 정보 표시
+            updateSenderAccountDisplay();
+            toggleMyAccounts();
+            
+            console.log('송금 계좌 선택:', selectedSenderAccount);
+        }
+        
+        // 선택한 송금 계좌 정보 표시 업데이트
+        function updateSenderAccountDisplay() {
+            if (selectedSenderAccount.accountNumber) {
+                // 잔액 카드 업데이트
+                const balanceCard = document.getElementById('balanceCard');
+                const currentBalance = document.getElementById('currentBalance');
+                const currentAccount = document.getElementById('currentAccount');
+                
+                currentBalance.textContent = new Intl.NumberFormat('ko-KR').format(selectedSenderAccount.balance) + '원';
+                currentAccount.textContent = `${selectedSenderAccount.accountName}: ${selectedSenderAccount.accountNumber}`;
+                
+                // 잔액에 따른 카드 색상 변경
+                const tier = getBalanceTier(selectedSenderAccount.balance);
+                balanceCard.classList.remove('tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-vip');
+                balanceCard.classList.add(tier);
+                
+                console.log('선택된 계좌 정보로 UI 업데이트 완료');
+            }
         }
 
         // 최근 송금 내역에서 선택
         function selectRecentTransfer(accountNumber, name, bank) {
             document.getElementById('accountInput').value = `${accountNumber} (${bank})`;
-            // 내계좌에 표시 필드에 받는 사람 이름 자동 입력
-            document.getElementById('receiverDisplay').value = name;
-            // 잔액 카드의 받는 사람 정보 업데이트
-            updateReceiverInfo(accountNumber, bank);
-        }
-
-        // 연락처에서 선택
-        function selectContact(phone, name) {
-            document.getElementById('contactInput').value = `${name} (${phone})`;
-            // 내계좌에 표시 필드에 연락처 이름 자동 입력
-            document.getElementById('receiverDisplay').value = name;
-        }
-
-        // 연락처 검색 열기 (모의 함수)
-        function openContactSearch() {
-            showAlert('연락처 검색 기능은 추후 구현 예정입니다.', 'info', '안내');
-        }
-
-        // 즐겨찾기 연락처 토글
-        function toggleFavoriteContacts() {
-            const list = document.getElementById('favoriteContactsList');
-            list.classList.toggle('expanded');
-        }
-
-        // 연락처 즐겨찾기 토글
-        function toggleContactFavorite(event, contactId) {
-            event.stopPropagation();
-            const index = favoriteContactList.indexOf(contactId);
             
-            if (index > -1) {
-                favoriteContactList.splice(index, 1);
-            } else {
-                favoriteContactList.push(contactId);
-            }
+            // 다음 단계 버튼 표시
+            document.getElementById('nextStepSection').style.display = 'block';
             
-            localStorage.setItem('favoriteContacts', JSON.stringify(favoriteContactList));
+            selectedAccountInfo = {
+                accountNumber: accountNumber,
+                bank: bank,
+                accountHolderName: name,
+                isVerified: true  // 최근 송금 내역은 이미 검증된 계좌
+            };
             
-            // 카운트 업데이트 및 목록 다시 렌더링
-            updateFavoriteContactsCount();
-            renderFavoriteContacts();
-            renderContacts(contacts);
-        }
-
-        // 즐겨찾기 연락처 카운트 업데이트
-        function updateFavoriteContactsCount() {
-            document.getElementById('favoriteContactsCount').textContent = favoriteContactList.length;
-        }
-
-        // 즐겨찾기 연락처 렌더링
-        function renderFavoriteContacts() {
-            const container = document.getElementById('favoriteContactsList');
-            const favoriteContacts = contacts.filter(contact => favoriteContactList.includes(contact.id));
-            
-            if (favoriteContacts.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">즐겨찾기된 연락처가 없습니다.</div>';
-                return;
-            }
-
-            container.innerHTML = favoriteContacts.map(contact => `
-                <div class="account-item" onclick="selectContact('${contact.phone}', '${contact.name}')">
-                    <div class="account-info">${contact.name}</div>
-                    <div class="account-number">${contact.phone}</div>
-                </div>
-            `).join('');
-        }
-
-        // 즐겨찾기 토글
-        function toggleFavorite(event, transferId) {
-            event.stopPropagation();
-            const index = favorites.indexOf(transferId);
-            
-            if (index > -1) {
-                favorites.splice(index, 1);
-            } else {
-                favorites.push(transferId);
-            }
-            
-            localStorage.setItem('transferFavorites', JSON.stringify(favorites));
-            
-            // 목록 다시 렌더링 (즐겨찾기 순서로 정렬)
-            renderRecentTransfers(recentTransfers);
+            console.log('최근 송금 선택:', selectedAccountInfo);
         }
 
         // 최근 송금 내역 검색
         function searchRecentTransfers() {
             const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = recentTransfers.filter(transfer => 
+            const filteredTransfers = recentTransfers.filter(transfer => 
                 transfer.name.toLowerCase().includes(query) ||
-                transfer.bank.toLowerCase().includes(query) ||
-                transfer.accountNumber.includes(query)
+                transfer.accountNumber.toLowerCase().includes(query) ||
+                transfer.bank.toLowerCase().includes(query)
             );
-            // 검색 결과도 즐겨찾기 순서로 정렬
-            renderRecentTransfers(filtered);
-        }
-
-        // 연락처 검색
-        function searchContacts() {
-            const query = document.getElementById('contactSearch').value.toLowerCase();
-            const filtered = contacts.filter(contact => 
-                contact.name.toLowerCase().includes(query) ||
-                contact.phone.includes(query)
-            );
-            renderContacts(filtered);
-        }
-
-        // 카메라로 계좌번호 인식 (모의 구현)
-        function openCamera() {
-            // 실제로는 카메라 API나 OCR 라이브러리를 사용
-            showAlert('카메라 기능은 추후 구현 예정입니다.\n지금은 직접 계좌번호를 입력해주세요.', 'info', '안내');
-        }
-
-        // 금액 포맷팅
-        function formatAmount(input) {
-            let value = input.value.replace(/[^0-9]/g, '');
-            if (value) {
-                value = parseInt(value).toLocaleString('ko-KR');
-            }
-            input.value = value;
             
-            // 실시간 유효성 검사
-            validateAmount(value);
+            const container = document.getElementById('recentTransfers');
+            if (filteredTransfers.length === 0) {
+                container.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
+                return;
+            }
+
+            container.innerHTML = filteredTransfers.map(transfer => `
+                <div class="transfer-item" onclick="selectRecentTransfer('${transfer.accountNumber}', '${transfer.name}', '${transfer.bank}')">
+                    <div class="transfer-name">${transfer.name}</div>
+                    <div class="transfer-details">
+                        <span>${transfer.bank} ${transfer.accountNumber}</span>
+                        <span>${new Intl.NumberFormat('ko-KR').format(transfer.lastAmount)}원 (${transfer.date})</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // 금액 유효성 검사
-        function validateAmount(value) {
-            const amount = parseInt(value.replace(/[^0-9]/g, '')) || 0;
-            const errorElement = document.getElementById('amountError');
+
+        // 은행 선택
+        function selectBank(bankName, element) {
+            // element가 없으면 event.target 사용 (하위 호환성)
+            const targetElement = element || event.target.closest('.bank-item');
             
-            if (amount < 1000) {
-                errorElement.textContent = '최소 송금 금액은 1,000원입니다.';
-            } else if (amount > 10000000) {
-                errorElement.textContent = '최대 송금 금액은 10,000,000원입니다.';
-            } else {
-                errorElement.textContent = '';
-            }
-        }
-
-        // 송금 처리 (확인 모달 표시)
-        async function handleTransfer() {
-            const accountInputValue = document.getElementById('accountInput').value;
-            // 계좌번호 (은행명) 형식에서 계좌번호와 은행명 분리
-            const accountMatch = accountInputValue.match(/^(.+?)\s*\((.+?)\)$/);
-            const accountNumber = accountMatch ? accountMatch[1].trim() : accountInputValue;
-            const selectedBank = accountMatch ? accountMatch[2].trim() : '';
-            const senderName = document.getElementById('senderName').value;
-            const receiverName = document.getElementById('receiverDisplay').value || '미입력';
-            const amountValue = document.getElementById('amount').value.replace(/[^0-9]/g, '');
-            const amount = parseInt(amountValue);
-            const memo = document.getElementById('memo').value || '메모 없음';
-
-            // 유효성 검사
-            if (!accountNumber) {
-                showAlert('계좌번호를 입력해주세요.', 'warning', '입력 확인');
-                return;
-            }
+            document.querySelectorAll('.bank-item').forEach(item => item.classList.remove('selected'));
+            targetElement.classList.add('selected');
             
-            if (!senderName) {
-                showAlert('받는계좌에 표시될 이름을 입력해주세요.', 'warning', '입력 확인');
-                return;
-            }
-
-            if (!amount || amount < 1000) {
-                showAlert('최소 송금 금액은 1,000원입니다.', 'warning', '금액 확인');
-                return;
-            }
-
-            if (amount > 10000000) {
-                showAlert('최대 송금 금액은 10,000,000원입니다.', 'warning', '금액 확인');
-                return;
-            }
-
-            // 송금 확인 모달에 정보 표시
-            document.getElementById('confirmAccountNumber').textContent = accountNumber;
-            document.getElementById('confirmBank').textContent = selectedBank || '미확인';
-            document.getElementById('confirmReceiverName').textContent = receiverName;
-            document.getElementById('confirmAmount').textContent = new Intl.NumberFormat('ko-KR').format(amount) + '원';
-            document.getElementById('confirmMemo').textContent = memo;
-
-            // PIN 인증을 통한 송금 확인
-            showPinAuthentication('transfer', { 
-                maxAttempts: 3,
-                title: '송금 인증번호 입력'
-            }, (success) => {
-                if (success) {
-                    // PIN 인증 성공 시 실제 송금 처리
-                    processActualTransfer();
-                } else {
-                    // PIN 인증 실패 시 송금 취소
-                    showAlert('송금이 취소되었습니다.', 'info', '송금 취소');
-                }
-            });
+            selectedAccountInfo.bank = bankName;
+            resetAccountVerification();
+            updateConfirmButton();
+            console.log('은행 선택:', bankName);
         }
 
-        // 송금 확인 모달 닫기
-        function closeTransferConfirmModal() {
-            document.getElementById('transferConfirmModal').classList.remove('show');
-            document.body.style.overflow = '';
-            // PIN 초기화
-            clearPin();
+        // 계좌 검증 상태 초기화
+        function resetAccountVerification() {
+            selectedAccountInfo.isVerified = false;
+            selectedAccountInfo.accountHolderName = '';
+            
+            const statusElement = document.getElementById('verificationStatus');
+            statusElement.className = 'verification-status';
+            statusElement.innerHTML = '';
+            
+            updateConfirmButton();
         }
 
-        // PIN 인증이 필요한 송금 확인 (모달 내 버튼용)
-        function processTransferConfirm() {
-            // 이 함수는 현재 PIN 인증 UI가 이미 표시된 상태에서 호출됨
-            // PIN 입력 안내 메시지만 표시
-            showAlert('위의 키패드를 사용하여 6자리 인증번호를 입력해주세요.', 'info', '인증번호 입력');
-        }
 
-        // 실제 송금 처리 (PIN 인증 완료 후 실행)
-        async function processActualTransfer() {
-            const accountInputValue = document.getElementById('accountInput').value;
-            const accountMatch = accountInputValue.match(/^(.+?)\s*\((.+?)\)$/);
-            const accountNumber = accountMatch ? accountMatch[1].trim() : accountInputValue;
-            const receiverName = document.getElementById('receiverDisplay').value || '받는분';
-            const amountValue = document.getElementById('amount').value.replace(/[^0-9]/g, '');
-            const amount = parseInt(amountValue);
-            const memo = document.getElementById('memo').value || '송금';
-
-            // UI 업데이트
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('submitButton').disabled = true;
-
+        // 계좌 검증 API 호출
+        async function verifyAccount(accountNumber, bankName) {
+            const statusElement = document.getElementById('verificationStatus');
+            
+            // 로딩 상태 표시
+            statusElement.className = 'verification-status loading';
+            statusElement.innerHTML = '📡 계좌 확인 중...';
+            
             const token = localStorage.getItem('accessToken');
             
             try {
-                // PIN 인증을 먼저 수행
-                const pinResponse = await fetch('/pin/verify', {
+                const response = await fetch('/api/accounts/verify', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        pin: currentPin, // 현재 입력된 PIN 사용
+                        accountNumber: accountNumber,
+                        bankName: bankName
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // 검증 성공
+                    const accountData = result.data;
+                    selectedAccountInfo.isVerified = true;
+                    selectedAccountInfo.accountHolderName = accountData.accountHolderName;
+                    selectedAccountInfo.accountNumber = accountNumber;
+                    
+                    statusElement.className = 'verification-status success';
+                    statusElement.innerHTML = `
+                        ✅ 계좌 확인 완료
+                        <div class="account-holder-name">${accountData.accountHolderName}</div>
+                    `;
+                    
+                    console.log('계좌 검증 성공:', accountData);
+                } else {
+                    // 검증 실패
+                    selectedAccountInfo.isVerified = false;
+                    selectedAccountInfo.accountHolderName = '';
+                    
+                    statusElement.className = 'verification-status error';
+                    statusElement.innerHTML = `❌ ${result.message || '계좌 확인에 실패했습니다.'}`;
+                    
+                    console.log('계좌 검증 실패:', result.message);
+                }
+                
+            } catch (error) {
+                console.error('계좌 검증 오류:', error);
+                selectedAccountInfo.isVerified = false;
+                selectedAccountInfo.accountHolderName = '';
+                
+                statusElement.className = 'verification-status error';
+                statusElement.innerHTML = '❌ 계좌 확인 중 오류가 발생했습니다.';
+            }
+            
+            updateConfirmButton();
+        }
+
+        // 확인 버튼 상태 업데이트
+        function updateConfirmButton() {
+            const accountNumber = document.getElementById('modalAccountInput').value.trim();
+            const selectedBank = document.querySelector('.bank-item.selected');
+            const confirmBtn = document.getElementById('confirmAccountBtn');
+            
+            // 계좌번호와 은행이 모두 입력/선택되면 확인 버튼 활성화
+            confirmBtn.disabled = !(accountNumber && selectedBank);
+        }
+
+        // 모달 계좌번호 입력 이벤트
+        // 첫 번째 이벤트 리스너는 아래에 통합된 버전으로 대체
+
+        // 계좌 선택 확인
+        async function confirmAccountSelection() {
+            const accountNumber = document.getElementById('modalAccountInput').value.trim();
+            const selectedBank = document.querySelector('.bank-item.selected');
+            const confirmBtn = document.getElementById('confirmAccountBtn');
+            
+            if (!accountNumber || !selectedBank) {
+                alert('계좌번호와 은행을 모두 입력/선택해주세요.');
+                return;
+            }
+            
+            // 버튼 비활성화 (중복 클릭 방지)
+            confirmBtn.disabled = true;
+            
+            try {
+                // 계좌 검증 실행
+                const bankName = selectedBank.getAttribute('data-bank');
+                console.log('계좌 검증 시작:', accountNumber, bankName);
+                await verifyAccount(accountNumber, bankName);
+                
+                // 검증이 완료되었는지 확인
+                if (!selectedAccountInfo.isVerified) {
+                    // 검증 실패 시
+                    console.log('계좌 검증 실패');
+                    confirmBtn.disabled = false;
+                    return;
+                }
+                
+                // 검증 성공 - 계좌 정보를 메인 화면에 표시
+                console.log('계좌 검증 성공:', selectedAccountInfo);
+                const displayText = `${selectedAccountInfo.accountNumber} (${selectedAccountInfo.bank})`;
+                document.getElementById('accountInput').value = displayText;
+                document.getElementById('nextStepSection').style.display = 'block';
+                
+                // 받는 사람 정보도 업데이트
+                const receiverNameElement = document.getElementById('receiverName');
+                if (receiverNameElement) {
+                    receiverNameElement.textContent = selectedAccountInfo.accountHolderName;
+                }
+                
+                console.log('계좌 선택 완료:', selectedAccountInfo);
+                
+                // 계좌 선택 모달 닫기
+                closeAccountModal();
+                
+                // 바로 송금 정보 입력 모달 열기
+                openTransferInfoModal();
+                
+            } catch (error) {
+                console.error('계좌 검증 중 오류:', error);
+                alert('계좌 검증 중 오류가 발생했습니다. 다시 시도해주세요.');
+                confirmBtn.disabled = false;
+            }
+        }
+
+        // 송금 정보 입력 모달 열기
+        function openTransferInfoModal() {
+            if (!selectedAccountInfo.accountNumber) {
+                alert('먼저 받을 계좌를 선택해주세요.');
+                return;
+            }
+            
+            // 송금 계좌가 선택되지 않은 경우 기본 계좌 사용
+            if (!selectedSenderAccount.accountNumber) {
+                // 주계좌를 기본 송금 계좌로 설정
+                const primaryAccount = myAccounts.find(acc => acc.isPrimary) || myAccounts[0];
+                if (primaryAccount) {
+                    selectedSenderAccount = {
+                        accountNumber: primaryAccount.accountNumber,
+                        accountName: primaryAccount.accountName,
+                        balance: primaryAccount.balance
+                    };
+                }
+            }
+
+            // 송금 계좌 정보 표시
+            document.getElementById('senderAccountName').textContent = '(' + selectedSenderAccount.accountName + ')' || 'EasyPay 계좌';
+            document.getElementById('senderAccountNumber').textContent = selectedSenderAccount.accountNumber;
+            document.getElementById('senderBankName').textContent = 'EasyPay';
+            document.getElementById('senderAccountBalance').textContent = new Intl.NumberFormat('ko-KR').format(selectedSenderAccount.balance) + '원';
+            
+            // 받는 계좌 정보 표시
+            document.getElementById('recipientAccountNumber').textContent = selectedAccountInfo.accountNumber;
+            document.getElementById('recipientBankName').textContent = selectedAccountInfo.bank;
+            document.getElementById('recipientAccountHolder').textContent = selectedAccountInfo.accountHolderName;
+
+            // 입력 필드 기본값 설정
+            document.getElementById('modalSenderName').value = currentUser?.name || '';
+            document.getElementById('modalReceiverDisplay').value = selectedAccountInfo.accountHolderName || selectedAccountInfo.name || '';
+            document.getElementById('modalAmount').value = '';
+            document.getElementById('modalMemo').value = '';
+            
+            document.getElementById('transferInfoModal').style.display = 'flex';
+            console.log('송금 정보 입력 모달 열림 - 송금계좌:', selectedSenderAccount, '수신계좌:', selectedAccountInfo);
+            
+            // 전역 키 이벤트 리스너 추가
+            document.addEventListener('keydown', handleTransferInfoGlobalKeyPress);
+        }
+
+        // 빠른 금액 선택
+        function setQuickAmount(amount) {
+            const amountInput = document.getElementById('modalAmount');
+            const formattedAmount = formatNumberWithCommas(amount);
+            amountInput.value = formattedAmount;
+            updateAmountDisplay(amount);
+            
+            // 버튼 선택 효과
+            document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            console.log('빠른 금액 선택:', amount);
+        }
+
+        // 숫자만 입력 허용 (키보드 입력 시)
+        function isNumberKey(evt) {
+            const charCode = evt.which ? evt.which : evt.keyCode;
+            // 숫자(0-9), 백스페이스(8), 삭제(46), 탭(9), 화살표 키들 허용
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        // 금액 입력 포맷팅
+        function formatAmountInput(input) {
+            // 숫자가 아닌 문자 제거
+            let value = input.value.replace(/[^\d]/g, '');
+            
+            if (value === '') {
+                input.value = '';
+                updateAmountDisplay(0);
+                return;
+            }
+            
+            // 숫자로 변환
+            const numericValue = parseInt(value, 10);
+            
+            // 최대 금액 제한 (예: 10억원)
+            if (numericValue > 1000000000) {
+                value = '1000000000';
+            }
+            
+            // 콤마 포맷팅
+            const formattedValue = formatNumberWithCommas(parseInt(value, 10));
+            input.value = formattedValue;
+            
+            // 금액 표시 업데이트
+            updateAmountDisplay(parseInt(value, 10));
+        }
+
+        // 숫자에 콤마 추가
+        function formatNumberWithCommas(num) {
+            if (isNaN(num)) return '';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // 금액 표시 업데이트
+        function updateAmountDisplay(amount) {
+            const displayElement = document.getElementById('amountDisplay');
+            if (amount > 0) {
+                const koreanAmount = convertToKoreanCurrency(amount);
+                displayElement.textContent = `${koreanAmount}`;
+            } else {
+                displayElement.textContent = '';
+            }
+        }
+
+        // 숫자를 한국어 화폐 단위로 변환
+        function convertToKoreanCurrency(amount) {
+            const units = ['', '만', '억', '조'];
+            const result = [];
+            
+            let num = amount;
+            let unitIndex = 0;
+            
+            while (num > 0 && unitIndex < units.length) {
+                const remainder = num % 10000;
+                if (remainder > 0) {
+                    result.unshift(remainder.toLocaleString() + units[unitIndex]);
+                }
+                num = Math.floor(num / 10000);
+                unitIndex++;
+            }
+            
+            return result.join(' ') + '원';
+        }
+
+        // 송금 정보 입력 모달 닫기
+        function closeTransferInfoModal() {
+            document.getElementById('transferInfoModal').style.display = 'none';
+            // 키 이벤트 리스너 제거
+            document.removeEventListener('keydown', handleTransferInfoGlobalKeyPress);
+        }
+
+        // PIN 인증으로 진행
+        function proceedToPinVerification() {
+            const senderName = document.getElementById('modalSenderName').value.trim();
+            const receiverDisplay = document.getElementById('modalReceiverDisplay').value.trim();
+            const amount = document.getElementById('modalAmount').value.trim();
+            
+            if (!senderName || !receiverDisplay || !amount) {
+                alert('모든 필수 정보를 입력해주세요.');
+                return;
+            }
+            
+            // 콤마 제거하고 숫자로 변환
+            const numericAmount = parseInt(amount.replace(/,/g, ''), 10);
+            
+            if (isNaN(numericAmount) || numericAmount < 1000) {
+                alert('최소 송금 금액은 1,000원입니다.');
+                return;
+            }
+            
+            closeTransferInfoModal();
+            openPinModal();
+        }
+
+        // PIN 모달 열기
+        function openPinModal() {
+            document.getElementById('modalPin').value = '';
+            document.getElementById('pinModal').style.display = 'flex';
+            console.log('PIN 모달 열림');
+            
+            // 전역 키 이벤트 리스너 추가
+            document.addEventListener('keydown', handlePinModalGlobalKeyPress);
+            
+            // PIN 입력 필드에 포커스
+            setTimeout(() => {
+                document.getElementById('modalPin').focus();
+            }, 100);
+        }
+
+        // PIN 모달 닫기
+        function closePinModal() {
+            document.getElementById('pinModal').style.display = 'none';
+            // 키 이벤트 리스너 제거
+            document.removeEventListener('keydown', handlePinModalGlobalKeyPress);
+        }
+
+        // PIN 검증 및 다음 단계
+        async function verifyPinAndProceed() {
+            const pin = document.getElementById('modalPin').value.trim();
+            
+            if (!pin || pin.length !== 6) {
+                alert('PIN 번호 6자리를 입력해주세요.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/pin/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify({
+                        pin: pin,
                         purpose: 'transfer'
                     })
                 });
-
-                const pinData = await pinResponse.json();
-
-                if (!pinResponse.ok || !pinData.success) {
-                    showAlert(pinData.message || 'PIN 인증에 실패했습니다.', 'error', 'PIN 인증 실패');
-                    return;
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    pinSessionToken = result.sessionToken;
+                    closePinModal();
+                    openFinalConfirmModal();
+                    console.log('PIN 인증 성공');
+                } else {
+                    alert(result.message || 'PIN 인증에 실패했습니다.');
                 }
+            } catch (error) {
+                console.error('PIN 검증 오류:', error);
+                alert('PIN 검증 중 오류가 발생했습니다.');
+            }
+        }
 
-                // PIN 인증 성공 후 보안 송금 API 호출
-                const transferResponse = await fetch('/transfers/secure', {
+        // 최종 확인 모달 열기
+        function openFinalConfirmModal() {
+            const senderName = document.getElementById('modalSenderName').value.trim();
+            const amount = document.getElementById('modalAmount').value.trim();
+            const memo = document.getElementById('modalMemo').value.trim();
+            
+            // 콤마 제거하고 숫자로 변환
+            const numericAmount = parseInt(amount.replace(/,/g, ''), 10);
+            
+            document.getElementById('finalReceiverName').textContent = senderName;
+            document.getElementById('finalReceiverAccount').textContent = `${selectedAccountInfo.bank} ${selectedAccountInfo.accountNumber}`;
+            document.getElementById('finalAmount').textContent = `${new Intl.NumberFormat('ko-KR').format(numericAmount)}원`;
+            document.getElementById('finalMemo').textContent = memo || '메모 없음';
+            
+            document.getElementById('finalConfirmModal').style.display = 'flex';
+            
+            // 엔터키 이벤트 리스너 추가
+            document.addEventListener('keypress', handleFinalConfirmKeyPress);
+            
+            console.log('최종 확인 모달 열림');
+        }
+
+        // 최종 확인 모달 닫기
+        function closeFinalConfirmModal() {
+            document.getElementById('finalConfirmModal').style.display = 'none';
+            
+            // 엔터키 이벤트 리스너 제거
+            document.removeEventListener('keypress', handleFinalConfirmKeyPress);
+        }
+
+        // 송금 실행
+        async function executeTransfer() {
+            if (!pinSessionToken) {
+                alert('PIN 인증이 필요합니다.');
+                return;
+            }
+            
+            const amount = document.getElementById('modalAmount').value.trim();
+            const memo = document.getElementById('modalMemo').value.trim();
+            
+            // 콤마 제거하고 숫자로 변환
+            const numericAmount = parseInt(amount.replace(/,/g, ''), 10);
+            
+            try {
+                const response = await fetch('/api/transfers/secure', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
                     },
                     body: JSON.stringify({
-                        receiverAccountNumber: accountNumber,
-                        amount: amount,
-                        memo: memo || '송금',
-                        pinSessionToken: pinData.sessionToken
+                        receiverAccountNumber: selectedAccountInfo.accountNumber,
+                        senderAccountNumber: selectedSenderAccount.accountNumber, // 선택한 송금 계좌 추가
+                        amount: numericAmount,
+                        memo: memo,
+                        pinSessionToken: pinSessionToken
                     })
                 });
-
-                const transferData = await transferResponse.json();
-
-                if (transferResponse.ok && transferData.success) {
-                    showAlert(`송금이 완료되었습니다!\n받는 사람: ${receiverName}\n송금액: ${new Intl.NumberFormat('ko-KR').format(amount)}원`, 'success', '송금 완료', false, () => {
-                        window.location.href = '/main.html';
-                    });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeFinalConfirmModal();
+                    
+                    // 성공 모달 표시
+                    const receiverName = document.getElementById('modalSenderName').value;
+                    const formattedAmount = new Intl.NumberFormat('ko-KR').format(numericAmount) + '원';
+                    const accountNumber = selectedAccountInfo.accountNumber;
+                    
+                    showSuccessModal(receiverName, formattedAmount, accountNumber);
+                    
+                    // 계좌 잔액 업데이트 이벤트 발생
+                    window.dispatchEvent(new CustomEvent('accountBalanceUpdated'));
+                    
+                    // 상태 초기화
+                    resetTransferState();
                 } else {
-                    let errorMessage = '송금에 실패했습니다.';
-                    if (transferData.message) {
-                        errorMessage = transferData.message;
-                    }
-                    showAlert(`송금 실패: ${errorMessage}`, 'error', '송금 실패');
+                    showErrorModal(result.message || '송금에 실패했습니다.');
                 }
             } catch (error) {
-                console.error('Transfer error:', error);
-                showAlert('송금 처리 중 오류가 발생했습니다.', 'error', '오류 발생');
-            } finally {
-                document.getElementById('loading').classList.remove('show');
-                document.getElementById('submitButton').disabled = false;
+                console.error('송금 처리 오류:', error);
+                showErrorModal('송금 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
             }
         }
+
+        // 송금 상태 초기화
+        function resetTransferState() {
+            selectedAccountInfo = { accountNumber: '', bank: '' };
+            pinSessionToken = null;
+            document.getElementById('nextStepSection').style.display = 'none';
+            document.getElementById('accountInput').value = '';
+        }
+
+        // 카메라 기능 (모의)
+        function openCamera() {
+            alert('카메라 기능은 추후 구현 예정입니다.\n지금은 직접 계좌번호를 입력해주세요.');
+        }
+
+        // 디버깅용 테스트 함수
 
         // 뒤로가기
         function goBack() {
             window.location.href = '/main.html';
         }
 
-        // 은행 및 증권사 데이터
-        const bankData = [
-            { code: 'NH', name: 'NH농협', icon: '🌾' },
-            { code: 'KAKAO', name: '카카오뱅크', icon: '🟡' },
-            { code: 'KB', name: 'KB국민', icon: '🏦' },
-            { code: 'TOSS', name: '토스뱅크', icon: '💳' },
-            { code: 'SHINHAN', name: '신한', icon: '🔵' },
-            { code: 'WOORI', name: '우리', icon: '🟢' },
-            { code: 'IBK', name: 'IBK기업', icon: '🏢' },
-            { code: 'HANA', name: '하나', icon: '🌿' },
-            { code: 'SAEMAEUL', name: '새마을', icon: '🏡' },
-            { code: 'BUSAN', name: '부산', icon: '🌊' },
-            { code: 'POST', name: '우체국', icon: '📬' },
-            { code: 'SC', name: 'SC제일', icon: '🇦' },
-            { code: 'KBANK', name: '케이뱅크', icon: '🟨' },
-            { code: 'SHINHYUP', name: '신협', icon: '🤝' }
-        ];
-
-        const securitiesData = [
-            { code: 'MIRAE', name: '미래에셋', icon: '📊' },
-            { code: 'SAMSUNG', name: '삼성증권', icon: '💹' },
-            { code: 'KB', name: 'KB증권', icon: '📈' },
-            { code: 'NH', name: 'NH투자증권', icon: '🌾' },
-            { code: 'HANTU', name: '한투증권', icon: '🔴' },
-            { code: 'KIWOOM', name: '키움증권', icon: '💰' },
-            { code: 'DAISHIN', name: '대신증권', icon: '🟠' },
-            { code: 'SHINHAN', name: '신한금투', icon: '🔵' },
-            { code: 'HANA', name: '하나금투', icon: '🌿' }
-        ];
-
-        // 은행/증권사 데이터 초기화
-        function initializeBankData() {
-            const bankGrid = document.getElementById('bankGrid');
-            const securitiesGrid = document.getElementById('securitiesGrid');
-
-            // 은행 목록 렌더링
-            bankGrid.innerHTML = bankData.map(bank => `
-                <div class="bank-item" data-type="bank" data-code="${bank.code}" onclick="selectBank('${bank.code}', '${bank.name}', 'bank')">
-                    <span class="bank-icon">${bank.icon}</span>
-                    <div class="bank-name">${bank.name}</div>
-                </div>
-            `).join('');
-
-            // 증권사 목록 렌더링
-            securitiesGrid.innerHTML = securitiesData.map(securities => `
-                <div class="bank-item" data-type="securities" data-code="${securities.code}" onclick="selectBank('${securities.code}', '${securities.name}', 'securities')">
-                    <span class="bank-icon">${securities.icon}</span>
-                    <div class="bank-name">${securities.name}</div>
-                </div>
-            `).join('');
+        // 성공 모달 열기
+        function showSuccessModal(receiverName, amount, accountNumber) {
+            document.getElementById('successReceiverName').textContent = receiverName;
+            document.getElementById('successAmount').textContent = amount;
+            document.getElementById('successAccountNumber').textContent = accountNumber;
+            document.getElementById('successModal').style.display = 'flex';
         }
 
-        // 계좌 모달 열기
-        function openAccountModal() {
-            // body 스크롤을 먼저 막기
-            document.body.style.overflow = 'hidden';
-            
-            const modal = document.getElementById('accountModal');
-            modal.classList.add('show');
-            
-            // 기존 선택 초기화
-            selectedBank = null;
-            modalAccountNumber = '';
-            document.getElementById('modalAccountInput').value = '';
-            document.getElementById('confirmAccountBtn').disabled = true;
-            
-            // 모든 선택 해제
-            document.querySelectorAll('.bank-item').forEach(item => {
-                item.classList.remove('selected');
-            });
+        // 성공 모달 닫기
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+            // 페이지 새로고침
+            window.location.reload();
+        }
 
+        // 에러 모달 열기
+        function showErrorModal(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+
+        // 에러 모달 닫기
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+
+        // PIN 입력 모달 엔터키 처리
+        function handlePinKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                verifyPinAndProceed();
+            }
+        }
+
+        // 송금 정보 입력 모달 엔터키 처리
+        function handleTransferInfoKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                proceedToPinVerification();
+            }
+        }
+
+        // 계좌 모달 엔터키 처리
+        function handleAccountModalKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const confirmBtn = document.getElementById('confirmAccountBtn');
+                if (!confirmBtn.disabled) {
+                    confirmAccountSelection();
+                }
+            }
+        }
+
+        // 최종 확인 모달 엔터키 처리
+        function handleFinalConfirmKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                executeTransfer();
+            }
+        }
+
+        // 전역 키 처리 함수들 (모달별)
+        function handleTransferInfoGlobalKeyPress(event) {
+            if (event.key === 'Enter' && document.getElementById('transferInfoModal').style.display === 'flex') {
+                event.preventDefault();
+                proceedToPinVerification();
+            }
+        }
+
+        function handlePinModalGlobalKeyPress(event) {
+            if (event.key === 'Enter' && document.getElementById('pinModal').style.display === 'flex') {
+                event.preventDefault();
+                verifyPinAndProceed();
+            }
+        }
+
+        function handleFinalConfirmGlobalKeyPress(event) {
+            if (event.key === 'Enter' && document.getElementById('finalConfirmModal').style.display === 'flex') {
+                event.preventDefault();
+                executeTransfer();
+            }
+        }
+
+
+        // 계좌 모달 열기 (통합 버전)
+        function openAccountModal() {
+            console.log('계좌 모달 열기 시작');
+            
+            // 모달 요소 확인
+            const modal = document.getElementById('accountModal');
+            if (!modal) {
+                console.error('accountModal 요소를 찾을 수 없습니다!');
+                return;
+            }
+            
+            console.log('accountModal 요소 찾음:', modal);
+            
+            // 모달 표시 (flex로 설정하여 중앙 정렬)
+            modal.style.display = 'flex';
+            console.log('모달 display를 flex로 설정');
+            
+            // 입력 필드 초기화
+            const modalInput = document.getElementById('modalAccountInput');
+            if (modalInput) {
+                modalInput.value = '';
+                console.log('모달 입력 필드 초기화');
+            } else {
+                console.warn('modalAccountInput 요소를 찾을 수 없습니다');
+            }
+            
+            // 은행 선택 초기화
+            document.querySelectorAll('.bank-item').forEach(item => item.classList.remove('selected'));
+            console.log('은행 선택 초기화');
+            
+            // 확인 버튼 비활성화
+            const confirmBtn = document.getElementById('confirmAccountBtn');
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                console.log('확인 버튼 비활성화');
+            } else {
+                console.warn('confirmAccountBtn 요소를 찾을 수 없습니다');
+            }
+            
+            // 검증 상태 초기화
+            selectedAccountInfo = {
+                accountNumber: '',
+                bank: '',
+                accountHolderName: '',
+                isVerified: false
+            };
+            console.log('검증 상태 초기화');
+            
+            // resetAccountVerification 함수가 있다면 호출
+            if (typeof resetAccountVerification === 'function') {
+                resetAccountVerification();
+                console.log('resetAccountVerification 호출');
+            } else {
+                console.warn('resetAccountVerification 함수가 정의되지 않음');
+            }
+            
             // 입력 필드에 포커스
             setTimeout(() => {
-                document.getElementById('modalAccountInput').focus();
-            }, 50);
+                const input = document.getElementById('modalAccountInput');
+                if (input) {
+                    input.focus();
+                    console.log('입력 필드에 포커스 설정');
+                }
+            }, 100);
+            
+            console.log('계좌 모달 열기 완료');
         }
 
         // 모달 헤더와 푸터 위치 조정
@@ -2524,61 +2464,16 @@
             }
         }
 
-        // 계좌 모달 닫기
+        // 계좌 모달 닫기 (통합 버전)
         function closeAccountModal() {
+            console.log('계좌 모달 닫기');
             const modal = document.getElementById('accountModal');
-            modal.classList.remove('show');
-            
-            // body 스크롤 복원
-            document.body.style.overflow = '';
+            modal.style.display = 'none';
         }
 
-        // 은행/증권사 선택
-        function selectBank(code, name, type) {
-            // 이전 선택 해제
-            document.querySelectorAll('.bank-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-            
-            // 새로운 선택 적용
-            const selectedElement = document.querySelector(`[data-code="${code}"][data-type="${type}"]`);
-            if (selectedElement) {
-                selectedElement.classList.add('selected');
-            }
-            
-            selectedBank = { code, name, type };
-            updateConfirmButton();
-        }
+        // 중복 함수 제거 - 위에 이미 정의됨
 
-        // 확인 버튼 상태 업데이트
-        function updateConfirmButton() {
-            const confirmBtn = document.getElementById('confirmAccountBtn');
-            const isValid = selectedBank && modalAccountNumber.trim();
-            confirmBtn.disabled = !isValid;
-            
-            if (isValid) {
-                confirmBtn.classList.add('active');
-            } else {
-                confirmBtn.classList.remove('active');
-            }
-        }
-
-        // 계좌 선택 확인
-        function confirmAccount() {
-            if (!selectedBank || !modalAccountNumber.trim()) {
-                showAlert('은행과 계좌번호를 모두 선택/입력해주세요.', 'warning', '입력 확인');
-                return;
-            }
-            
-            // 메인 페이지에 정보 설정 - 계좌번호 (은행명) 형식으로 표시
-            document.getElementById('accountInput').value = `${modalAccountNumber} (${selectedBank.name})`;
-            
-            // 잔액 카드의 받는 사람 정보 업데이트
-            updateReceiverInfo(modalAccountNumber, selectedBank.name);
-            
-            // 모달 닫기
-            closeAccountModal();
-        }
+        // 계좌 선택 확인 (중복 제거됨 - confirmAccountSelection 사용)
 
         // 받는 사람 정보 업데이트 함수
         function updateReceiverInfo(accountNumber, bank) {
@@ -2602,38 +2497,7 @@
             }
         });
 
-        // 추가 이벤트 리스너 설정
-        document.addEventListener('DOMContentLoaded', function() {
-            // 모달 계좌번호 입력 이벤트
-            const modalAccountInput = document.getElementById('modalAccountInput');
-            if (modalAccountInput) {
-                modalAccountInput.addEventListener('input', function(e) {
-                    modalAccountNumber = e.target.value;
-                    updateConfirmButton();
-                });
-            }
-            
-            // ESC 키로 모달 닫기
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const modal = document.getElementById('accountModal');
-                    if (modal && modal.classList.contains('show')) {
-                        closeAccountModal();
-                    }
-                }
-            });
-            
-            // 모달 오버레이 클릭 시 모달 닫기
-            const modalOverlay = document.getElementById('accountModal');
-            if (modalOverlay) {
-                modalOverlay.addEventListener('click', function(e) {
-                    if (e.target === modalOverlay) {
-                        closeAccountModal();
-                    }
-                });
-            }
-            
-        });
+        // 추가 이벤트 리스너들은 첫 번째 DOMContentLoaded에서 처리됨
 
         // 백그라운드 토큰 체크
         async function backgroundTokenCheck() {
@@ -2651,10 +2515,10 @@
                 
                 // 만료되었거나 곧 만료될 예정이면 갱신 시도
                 if (currentTime >= expirationTime || (expirationTime - currentTime < 60000)) {
-                    console.log('🔄 송금 페이지 백그라운드 토큰 갱신 시도...');
+                    console.log('송금 페이지 백그라운드 토큰 갱신 시도');
                     const success = await window.refreshToken(); // common.js의 함수 사용
                     if (!success) {
-                        console.log('❌ 백그라운드 토큰 갱신 실패, 로그아웃');
+                        console.log('백그라운드 토큰 갱신 실패, 로그아웃');
                         showAutoLogoutPopup();
                     }
                 }

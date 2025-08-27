@@ -28,6 +28,34 @@ public class PinService {
     
     // PIN 임시 세션 토큰의 만료 시간 (분)
     private static final int PIN_SESSION_EXPIRE_MINUTES = 5;
+    
+    /**
+     * PIN 검증 (단순 boolean 반환)
+     */
+    @Transactional(readOnly = true)
+    public boolean verifyPin(Long userId, String pin) {
+        try {
+            if (pin == null || pin.length() != 6) {
+                return false;
+            }
+            
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                return false;
+            }
+            
+            User user = userOpt.get();
+            if (!user.hasPinSet()) {
+                return false;
+            }
+            
+            return passwordEncoder.matches(pin, user.getTransferPin());
+            
+        } catch (Exception e) {
+            log.error("PIN 검증 중 오류 발생: userId={}", userId, e);
+            return false;
+        }
+    }
 
     /**
      * PIN 등록 (최초 설정)

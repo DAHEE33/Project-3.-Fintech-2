@@ -38,6 +38,12 @@ public class TransactionHistory {
 
     private String description;
     private String referenceId;
+    
+    @Column(name = "transaction_id")
+    private String transactionId;
+    
+    @Column(name = "created_by")
+    private String createdBy;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

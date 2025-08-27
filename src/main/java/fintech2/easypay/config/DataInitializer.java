@@ -2,10 +2,15 @@ package fintech2.easypay.config;
 
 import fintech2.easypay.account.entity.Account;
 import fintech2.easypay.account.entity.AccountBalance;
+import fintech2.easypay.account.entity.UserAccount;
 import fintech2.easypay.account.repository.AccountRepository;
 import fintech2.easypay.account.repository.AccountBalanceRepository;
+import fintech2.easypay.account.repository.UserAccountRepository;
 import fintech2.easypay.auth.entity.User;
 import fintech2.easypay.auth.repository.UserRepository;
+import fintech2.easypay.transfer.entity.Transfer;
+import fintech2.easypay.transfer.entity.TransferStatus;
+import fintech2.easypay.transfer.repository.TransferRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -23,6 +29,8 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final AccountBalanceRepository accountBalanceRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final TransferRepository transferRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -50,6 +58,9 @@ public class DataInitializer implements CommandLineRunner {
             log.info("임시 테스트 사용자가 이미 존재합니다.");
         }
         
+        // 테스트 송금 데이터 생성 (메모 표시 테스트용)
+        createTestTransfers();
+        
         log.info("애플리케이션 초기 데이터 생성 완료!");
     }
 
@@ -69,10 +80,9 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             user1 = userRepository.save(user1);
             
-            // 계좌번호 생성 (EasyPay 가상계좌)
+            // 첫 번째 계좌 생성 (주계좌)
             String accountNumber1 = "EP" + String.format("%010d", user1.getId());
             
-            // Account 엔티티 생성
             Account account1 = Account.builder()
                     .accountNumber(accountNumber1)
                     .userId(user1.getId())
@@ -81,19 +91,54 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             accountRepository.save(account1);
             
-            // AccountBalance 엔티티 생성 (BalanceService에서 사용)
             AccountBalance accountBalance1 = AccountBalance.builder()
                     .accountNumber(accountNumber1)
                     .balance(new BigDecimal("1000000"))
                     .build();
             accountBalanceRepository.save(accountBalance1);
             
-            // User 엔티티에 계좌번호 설정
+            // 두 번째 계좌 생성 (예적금 계좌)
+            String accountNumber2 = "EP" + String.format("%010d", user1.getId() + 1000);
+            
+            Account account2 = Account.builder()
+                    .accountNumber(accountNumber2)
+                    .userId(user1.getId())
+                    .balance(new BigDecimal("500000")) // 초기 잔액 50만원
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            accountRepository.save(account2);
+            
+            AccountBalance accountBalance2 = AccountBalance.builder()
+                    .accountNumber(accountNumber2)
+                    .balance(new BigDecimal("500000"))
+                    .build();
+            accountBalanceRepository.save(accountBalance2);
+            
+            // User 엔티티에 주계좌번호 설정 (첫 번째 계좌를 주계좌로)
             user1.setAccountNumber(accountNumber1);
             userRepository.save(user1);
             
-            log.info("테스트 사용자1 생성 완료: 전화번호={}, 계좌번호={}, 초기잔액=1,000,000원", 
-                    user1.getPhoneNumber(), accountNumber1);
+            // UserAccount 데이터 생성 (다중 계좌 시스템용)
+            UserAccount userAccount1 = UserAccount.builder()
+                    .userId(user1.getId())
+                    .accountNumber(accountNumber1)
+                    .accountName("주거래계좌")
+                    .balance(new BigDecimal("1000000")) // 잔액 설정
+                    .isPrimary(true)
+                    .build();
+            userAccountRepository.save(userAccount1);
+            
+            UserAccount userAccount2 = UserAccount.builder()
+                    .userId(user1.getId())
+                    .accountNumber(accountNumber2)
+                    .accountName("예적금계좌")
+                    .balance(new BigDecimal("500000")) // 잔액 설정
+                    .isPrimary(false)
+                    .build();
+            userAccountRepository.save(userAccount2);
+            
+            log.info("테스트 사용자1 생성 완료: 전화번호={}, 주계좌={} (1,000,000원), 예적금계좌={} (500,000원)", 
+                    user1.getPhoneNumber(), accountNumber1, accountNumber2);
                     
         } catch (Exception e) {
             log.error("테스트 사용자1 생성 실패: {}", e.getMessage(), e);
@@ -116,31 +161,65 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
             user2 = userRepository.save(user2);
             
-            // 계좌번호 생성 (EasyPay 가상계좌)
-            String accountNumber2 = "EP" + String.format("%010d", user2.getId());
+            // 첫 번째 계좌 생성 (주계좌)
+            String accountNumber1 = "EP" + String.format("%010d", user2.getId());
             
-            // Account 엔티티 생성
+            Account account1 = Account.builder()
+                    .accountNumber(accountNumber1)
+                    .userId(user2.getId())
+                    .balance(new BigDecimal("750000")) // 초기 잔액 75만원
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            accountRepository.save(account1);
+            
+            AccountBalance accountBalance1 = AccountBalance.builder()
+                    .accountNumber(accountNumber1)
+                    .balance(new BigDecimal("750000"))
+                    .build();
+            accountBalanceRepository.save(accountBalance1);
+            
+            // 두 번째 계좌 생성 (예적금 계좌)
+            String accountNumber2 = "EP" + String.format("%010d", user2.getId() + 1000);
+            
             Account account2 = Account.builder()
                     .accountNumber(accountNumber2)
                     .userId(user2.getId())
-                    .balance(new BigDecimal("500000")) // 초기 잔액 50만원
+                    .balance(new BigDecimal("300000")) // 초기 잔액 30만원
                     .createdAt(LocalDateTime.now())
                     .build();
             accountRepository.save(account2);
             
-            // AccountBalance 엔티티 생성 (BalanceService에서 사용)
             AccountBalance accountBalance2 = AccountBalance.builder()
                     .accountNumber(accountNumber2)
-                    .balance(new BigDecimal("500000"))
+                    .balance(new BigDecimal("300000"))
                     .build();
             accountBalanceRepository.save(accountBalance2);
             
-            // User 엔티티에 계좌번호 설정
-            user2.setAccountNumber(accountNumber2);
+            // User 엔티티에 주계좌번호 설정 (첫 번째 계좌를 주계좌로)
+            user2.setAccountNumber(accountNumber1);
             userRepository.save(user2);
             
-            log.info("테스트 사용자2 생성 완료: 전화번호={}, 계좌번호={}, 초기잔액=500,000원", 
-                    user2.getPhoneNumber(), accountNumber2);
+            // UserAccount 데이터 생성 (다중 계좌 시스템용)
+            UserAccount userAccount1 = UserAccount.builder()
+                    .userId(user2.getId())
+                    .accountNumber(accountNumber1)
+                    .accountName("주거래계좌")
+                    .balance(new BigDecimal("750000")) // 잔액 설정
+                    .isPrimary(true)
+                    .build();
+            userAccountRepository.save(userAccount1);
+            
+            UserAccount userAccount2 = UserAccount.builder()
+                    .userId(user2.getId())
+                    .accountNumber(accountNumber2)
+                    .accountName("예적금계좌")
+                    .balance(new BigDecimal("300000")) // 잔액 설정
+                    .isPrimary(false)
+                    .build();
+            userAccountRepository.save(userAccount2);
+            
+            log.info("테스트 사용자2 생성 완료: 전화번호={}, 주계좌={} (750,000원), 예적금계좌={} (300,000원)", 
+                    user2.getPhoneNumber(), accountNumber1, accountNumber2);
                     
         } catch (Exception e) {
             log.error("테스트 사용자2 생성 실패: {}", e.getMessage(), e);
@@ -192,5 +271,97 @@ public class DataInitializer implements CommandLineRunner {
         } catch (Exception e) {
             log.error("임시 테스트 사용자 생성 실패: {}", e.getMessage(), e);
         }
+    }
+
+    private void createTestTransfers() {
+        try {
+            log.info("테스트 송금 데이터 생성 중...");
+            
+            // 이미 송금 데이터가 있는지 확인
+            if (transferRepository.count() > 0) {
+                log.info("송금 데이터가 이미 존재합니다.");
+                return;
+            }
+            
+            // 사용자1과 사용자2 조회
+            User user1 = userRepository.findByPhoneNumber("01012345678").orElse(null);
+            User user2 = userRepository.findByPhoneNumber("01098765432").orElse(null);
+            User tempUser = userRepository.findByPhoneNumber("01012341234").orElse(null);
+            
+            if (user1 == null || user2 == null || tempUser == null) {
+                log.warn("사용자가 존재하지 않아 테스트 송금 데이터를 생성할 수 없습니다.");
+                return;
+            }
+            
+            // 계좌 정보 가져오기
+            String user1Account = "EP" + String.format("%010d", user1.getId());
+            String user2Account = "EP" + String.format("%010d", user2.getId());
+            String tempUserAccount = "EP" + String.format("%010d", tempUser.getId());
+            
+            // 테스트 송금 1: 사용자1 -> 사용자2 (메모 있음)
+            Transfer transfer1 = Transfer.builder()
+                    .transactionId(generateTransactionId())
+                    .sender(user1)
+                    .senderAccountNumber(user1Account)
+                    .receiver(user2)
+                    .receiverAccountNumber(user2Account)
+                    .amount(new BigDecimal("50000"))
+                    .memo("점심값 보내드립니다! 맛있게 드세요 😊")
+                    .status(TransferStatus.COMPLETED)
+                    .processedAt(LocalDateTime.now().minusHours(2))
+                    .build();
+            transferRepository.save(transfer1);
+            
+            // 테스트 송금 2: 사용자1 -> 임시사용자 (메모 있음)
+            Transfer transfer2 = Transfer.builder()
+                    .transactionId(generateTransactionId())
+                    .sender(user1)
+                    .senderAccountNumber(user1Account)
+                    .receiver(tempUser)
+                    .receiverAccountNumber(tempUserAccount)
+                    .amount(new BigDecimal("30000"))
+                    .memo("생일축하해! 생일선물이야 🎉")
+                    .status(TransferStatus.COMPLETED)
+                    .processedAt(LocalDateTime.now().minusHours(1))
+                    .build();
+            transferRepository.save(transfer2);
+            
+            // 테스트 송금 3: 사용자1 -> 사용자2 (메모 없음)
+            Transfer transfer3 = Transfer.builder()
+                    .transactionId(generateTransactionId())
+                    .sender(user1)
+                    .senderAccountNumber(user1Account)
+                    .receiver(user2)
+                    .receiverAccountNumber(user2Account)
+                    .amount(new BigDecimal("100000"))
+                    .memo(null) // 메모 없음
+                    .status(TransferStatus.COMPLETED)
+                    .processedAt(LocalDateTime.now().minusMinutes(30))
+                    .build();
+            transferRepository.save(transfer3);
+            
+            // 테스트 송금 4: 사용자1 -> 임시사용자 (긴 메모)
+            Transfer transfer4 = Transfer.builder()
+                    .transactionId(generateTransactionId())
+                    .sender(user1)
+                    .senderAccountNumber(user1Account)
+                    .receiver(tempUser)
+                    .receiverAccountNumber(tempUserAccount)
+                    .amount(new BigDecimal("25000"))
+                    .memo("프로젝트 회식비용입니다. 다들 고생 많으셨어요! 오늘 저녁에는 맛있는 걸 드세요.")
+                    .status(TransferStatus.COMPLETED)
+                    .processedAt(LocalDateTime.now().minusMinutes(10))
+                    .build();
+            transferRepository.save(transfer4);
+            
+            log.info("테스트 송금 데이터 생성 완료: 총 {}건", 4);
+            
+        } catch (Exception e) {
+            log.error("테스트 송금 데이터 생성 실패: {}", e.getMessage(), e);
+        }
+    }
+    
+    private String generateTransactionId() {
+        return "TXN" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
     }
 }

@@ -17,6 +17,14 @@ spring:
 #jwt:
 #  expiration: 86400000
 
+# 외부 은행 API 설정
+external:
+  banking:
+    api:
+      base-url: https://api.banking.example.com
+      timeout: 30000
+      key: ${BANKING_API_KEY:test-api-key}
+
 logging:
   level:
     org.springframework.security: DEBUG

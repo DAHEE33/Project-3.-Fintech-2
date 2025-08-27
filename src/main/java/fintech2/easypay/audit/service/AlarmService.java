@@ -91,7 +91,7 @@ public class AlarmService {
         sendAdminNotification("SECURITY_ISSUE", "로그인 실패: " + phoneNumber + " - " + reason, null);
     }
 
-    // 이상거래 감지 및 알림
+    // 이상거래 감지 및 알림 --> 추후 사용 예정
     public void detectSuspiciousTransaction(String accountNumber, String userId, BigDecimal amount, String transactionType) {
         // 1. 대금액 거래 감지
         if (amount.compareTo(SUSPICIOUS_AMOUNT_THRESHOLD) > 0) {
