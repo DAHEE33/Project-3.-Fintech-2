@@ -11,15 +11,14 @@ services:
       - "8090:8090"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/easypay
-      - SPRING_DATASOURCE_USERNAME=easypay
-      - SPRING_DATASOURCE_PASSWORD=easypay123
-      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-key}
+      # AWS RDS 엔드포인트 사용
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://your-rds-endpoint.amazonaws.com:5432/easypay
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_started
     networks:
@@ -31,27 +30,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  db:
-    image: postgres:15-alpine
-    container_name: fintech-db
-    environment:
-      - POSTGRES_DB=easypay
-      - POSTGRES_USER=easypay
-      - POSTGRES_PASSWORD=easypay123
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
-    networks:
-      - easypay-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U easypay -d easypay"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      - ./logs:/app/logs
+
+  # DB 서비스 제거 - AWS RDS 사용
 
   redis:
     image: redis:7-alpine
@@ -81,9 +63,8 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
   redis_data:
 
 networks:
   easypay-network:
-    driver: bridge 
+    driver: bridge

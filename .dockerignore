@@ -1,52 +1,46 @@
-# Git
-.git
-.gitignore
-.gitattributes
+# Gradle
+.gradle/
+build/
+!build/libs/*.jar
 
 # IDE
-.idea
-.vscode
+.idea/
 *.iml
-*.ipr
-*.iws
+.vscode/
+*.swp
+*.swo
 
-# Build
-build/
-.gradle/
+# OS
+.DS_Store
+Thumbs.db
 
 # Logs
 *.log
 logs/
 
-# OS
-.DS_Store
-Thumbs.db
+# Test
+src/test/
+test-accounts.json
+test-tokens.txt
+transfer.json
+
+# Documentation
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
 
 # Docker
 Dockerfile
 docker-compose.yml
 .dockerignore
 
-# Documentation
-README.md
-docs/
-
-# Test
-src/test/
-
-# Development
-application-dev.yml
-application-test.yml
-
-# CI/CD
-.github/
-
-# Config
-config/spotbugs/
-config/pmd/
-config/dependency-check/
+# Environment
+.env
+*.env
 
 # Temporary files
 *.tmp
-*.temp
-*~ 
+*.temp 

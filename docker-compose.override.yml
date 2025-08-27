@@ -1,0 +1,12 @@
+# 개발 환경용 override 설정
+# docker-compose up 실행 시 자동으로 적용됨
+version: '3.8'
+
+services:
+  easypay:
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    volumes:
+      - ./logs:/app/logs
+      # 개발 시 소스 코드 변경 감지를 위한 볼륨 마운트 (선택사항)
+      # - ./src:/app/src:ro
