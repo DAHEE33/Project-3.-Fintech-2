@@ -10,3 +10,4 @@ services:
       - ./logs:/app/logs
       # 개발 시 소스 코드 변경 감지를 위한 볼륨 마운트 (선택사항)
       # - ./src:/app/src:ro
+

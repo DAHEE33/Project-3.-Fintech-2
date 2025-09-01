@@ -4,7 +4,7 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy gradle files
+# Copy gradle files first for better caching
 COPY gradlew .
 COPY gradle gradle
 COPY build.gradle.kts .
@@ -13,17 +13,20 @@ COPY settings.gradle.kts .
 # Make gradlew executable
 RUN chmod +x ./gradlew
 
-# Download dependencies
+# Download dependencies (cached layer)
 RUN ./gradlew dependencies --no-daemon
 
 # Copy source code
 COPY src src
 
-# Build the application
-RUN ./gradlew build -x test --no-daemon
+# Build the application (skip tests for faster build)
+RUN ./gradlew bootJar -x test --no-daemon
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
+
+# Install wget for healthcheck
+RUN apk add --no-cache wget
 
 # Create app user
 RUN addgroup -g 1001 -S appgroup && \
