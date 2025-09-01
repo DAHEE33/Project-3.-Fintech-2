@@ -22,13 +22,10 @@ logs/
 
 # Test files
 src/test/
-test-*.json
-test-*.txt
 
 # Documentation
 *.md
-DRAFT.md
-README*.md
+DEPLOYMENT.md
 
 # Docker files (except Dockerfile)
 docker-compose*.yml
@@ -48,14 +45,10 @@ node_modules/
 # Environment files
 .env
 .env.local
-env.example
+env.rds.example
 
 # Scripts
 scripts/
-start.sh
 
 # Performance test files
-src/gatling/
-
-# Nginx (removed)
-nginx/ 
+src/gatling/ 

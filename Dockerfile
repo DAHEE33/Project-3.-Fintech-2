@@ -13,14 +13,11 @@ COPY settings.gradle.kts .
 # Make gradlew executable
 RUN chmod +x ./gradlew
 
-# Download dependencies (cached layer)
-RUN ./gradlew dependencies --no-daemon
-
 # Copy source code
 COPY src src
 
-# Build the application (skip tests for faster build)
-RUN ./gradlew bootJar -x test --no-daemon
+# Build the application (skip tests and dependencies download for faster build)
+RUN ./gradlew bootJar -x test --no-daemon --offline
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
