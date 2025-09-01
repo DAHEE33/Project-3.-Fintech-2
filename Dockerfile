@@ -16,8 +16,8 @@ RUN chmod +x ./gradlew
 # Copy source code
 COPY src src
 
-# Build the application (skip tests and dependencies download for faster build)
-RUN ./gradlew bootJar -x test --no-daemon --offline
+# Build the application (skip tests for faster build)
+RUN ./gradlew bootJar -x test --no-daemon
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
