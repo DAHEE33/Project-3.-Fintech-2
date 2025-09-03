@@ -1,6 +1,6 @@
 services:
   app:
-    image: 869953506326.dkr.ecr.ap-northeast-2.amazonaws.com/fintech-app:staging-latest
+    image: 869935063261.dkr.ecr.ap-northeast-2.amazonaws.com/fintech-app:staging-latest
     container_name: easypay-app-staging
     ports:
       - "8091:8090"

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: 869953506326.dkr.ecr.ap-northeast-2.amazonaws.com/fintech-app:latest
+    image: 869935063261.dkr.ecr.ap-northeast-2.amazonaws.com/fintech-app:latest
     container_name: easypay-app-prod
     ports:
       - "8090:8090"
