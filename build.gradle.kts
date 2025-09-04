@@ -78,6 +78,8 @@ dependencies {
 	// Gatling 성능 테스트
 	gatlingImplementation("io.gatling.highcharts:gatling-charts-highcharts:3.10.5")
 	gatlingImplementation("io.gatling:gatling-http-java:3.10.5")
+
+	
 }
 
 tasks.withType<Test> {

@@ -5,4 +5,7 @@ services:
     image: 869935063261.dkr.ecr.ap-northeast-2.amazonaws.com/fintech-app:latest
     restart: unless-stopped
     environment:
-      SERVER_PORT: "8090" 
+      SERVER_PORT: "8090"
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD} 
