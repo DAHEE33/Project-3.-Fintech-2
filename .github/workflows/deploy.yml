@@ -65,10 +65,7 @@ jobs:
             # 최신 이미지 pull 및 기동
             docker pull ${{ secrets.ECR_REPO }}:staging-latest
             docker compose -f docker-compose.yml -f docker-compose.staging.yml \
-              --project-name easypay-staging up -d \
-              -e SPRING_DATASOURCE_URL="${{ secrets.SPRING_DATASOURCE_URL }}" \
-              -e SPRING_DATASOURCE_USERNAME="${{ secrets.SPRING_DATASOURCE_USERNAME }}" \
-              -e SPRING_DATASOURCE_PASSWORD="${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
+              --project-name easypay-staging up -d
 
             # 청소
             docker image prune -f || true

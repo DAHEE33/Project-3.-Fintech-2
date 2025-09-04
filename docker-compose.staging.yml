@@ -4,5 +4,7 @@ services:
     container_name: easypay-app-staging
     ports:
       - "8091:8090"
+    env_file:
+      - ./.env.staging
     environment:
       SPRING_PROFILES_ACTIVE: "staging"
