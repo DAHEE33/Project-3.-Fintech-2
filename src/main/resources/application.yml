@@ -6,10 +6,10 @@ spring:
   
   # PostgreSQL 설정 (환경변수에서 주입)
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/easypay}
     driver-class-name: org.postgresql.Driver
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
   
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

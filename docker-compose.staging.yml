@@ -5,6 +5,6 @@ services:
     ports:
       - "8091:8090"
     env_file:
-      - ./.env.staging
+      - .env.staging
     environment:
       SPRING_PROFILES_ACTIVE: "staging"
