@@ -5,6 +5,11 @@ services:
     ports:
       - "8091:8090"
     env_file:
-      - .env.staging
+      - ./.env.staging
     environment:
-      SPRING_PROFILES_ACTIVE: "staging"
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-staging}
+      SERVER_PORT: ${SERVER_PORT:-8090}
+      JWT_SECRET: ${JWT_SECRET:-}
+      REDIS_HOST: ${REDIS_HOST:-}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
