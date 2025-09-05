@@ -35,19 +35,25 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
   
-  # Redis 설정 (세션 저장소)
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-          max-wait: -1ms
+  # Redis 자동 설정 비활성화 (로컬 테스트 환경)
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  
+  # Redis 설정 (세션 저장소) - 주석 처리
+  # data:
+  #   redis:
+  #     host: ${REDIS_HOST:localhost}
+  #     port: ${REDIS_PORT:6379}
+  #     password: ${REDIS_PASSWORD:}
+  #     timeout: 2000ms
+  #     lettuce:
+  #       pool:
+  #         max-active: 8
+  #         max-idle: 8
+  #         min-idle: 0
+  #         max-wait: -1ms
 
 # 서버 설정
 server:
@@ -99,12 +105,12 @@ management:
       export:
         enabled: true
 
-  # 캐시 설정
-  cache:
-    type: redis
-    redis:
-      time-to-live: 600000 # 10분
-      cache-null-values: false
+  # 캐시 설정 (Redis 비활성화로 인해 주석 처리)
+  # cache:
+  #   type: redis
+  #   redis:
+  #     time-to-live: 600000 # 10분
+  #     cache-null-values: false
 
 # 보안 설정
 security:
