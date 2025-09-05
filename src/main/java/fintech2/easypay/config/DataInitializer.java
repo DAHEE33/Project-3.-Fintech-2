@@ -300,13 +300,14 @@ public class DataInitializer implements CommandLineRunner {
             
             // 테스트 송금 1: 사용자1 -> 사용자2 (메모 있음)
             Transfer transfer1 = Transfer.builder()
+                    .transferId(generateTransferId())
                     .transactionId(generateTransactionId())
                     .sender(user1)
                     .senderAccountNumber(user1Account)
                     .receiver(user2)
                     .receiverAccountNumber(user2Account)
                     .amount(new BigDecimal("50000"))
-                    .memo("점심값 보내드립니다! 맛있게 드세요 😊")
+                    .description("점심값 보내드립니다! 맛있게 드세요 😊") // memo -> description
                     .status(TransferStatus.COMPLETED)
                     .processedAt(LocalDateTime.now().minusHours(2))
                     .build();
@@ -314,13 +315,14 @@ public class DataInitializer implements CommandLineRunner {
             
             // 테스트 송금 2: 사용자1 -> 임시사용자 (메모 있음)
             Transfer transfer2 = Transfer.builder()
+                    .transferId(generateTransferId())
                     .transactionId(generateTransactionId())
                     .sender(user1)
                     .senderAccountNumber(user1Account)
                     .receiver(tempUser)
                     .receiverAccountNumber(tempUserAccount)
                     .amount(new BigDecimal("30000"))
-                    .memo("생일축하해! 생일선물이야 🎉")
+                    .description("생일축하해! 생일선물이야 🎉") // memo -> description
                     .status(TransferStatus.COMPLETED)
                     .processedAt(LocalDateTime.now().minusHours(1))
                     .build();
@@ -328,13 +330,14 @@ public class DataInitializer implements CommandLineRunner {
             
             // 테스트 송금 3: 사용자1 -> 사용자2 (메모 없음)
             Transfer transfer3 = Transfer.builder()
+                    .transferId(generateTransferId())
                     .transactionId(generateTransactionId())
                     .sender(user1)
                     .senderAccountNumber(user1Account)
                     .receiver(user2)
                     .receiverAccountNumber(user2Account)
                     .amount(new BigDecimal("100000"))
-                    .memo(null) // 메모 없음
+                    .description(null) // 메모 없음
                     .status(TransferStatus.COMPLETED)
                     .processedAt(LocalDateTime.now().minusMinutes(30))
                     .build();
@@ -342,13 +345,14 @@ public class DataInitializer implements CommandLineRunner {
             
             // 테스트 송금 4: 사용자1 -> 임시사용자 (긴 메모)
             Transfer transfer4 = Transfer.builder()
+                    .transferId(generateTransferId())
                     .transactionId(generateTransactionId())
                     .sender(user1)
                     .senderAccountNumber(user1Account)
                     .receiver(tempUser)
                     .receiverAccountNumber(tempUserAccount)
                     .amount(new BigDecimal("25000"))
-                    .memo("프로젝트 회식비용입니다. 다들 고생 많으셨어요! 오늘 저녁에는 맛있는 걸 드세요.")
+                    .description("프로젝트 회식비용입니다. 다들 고생 많으셨어요! 오늘 저녁에는 맛있는 걸 드세요.") // memo -> description
                     .status(TransferStatus.COMPLETED)
                     .processedAt(LocalDateTime.now().minusMinutes(10))
                     .build();
@@ -363,5 +367,9 @@ public class DataInitializer implements CommandLineRunner {
     
     private String generateTransactionId() {
         return "TXN" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
+    }
+    
+    private String generateTransferId() {
+        return "TRF" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
     }
 }

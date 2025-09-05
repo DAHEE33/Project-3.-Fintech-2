@@ -23,31 +23,34 @@ public class Transfer extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "transaction_id", unique = true, nullable = false)
+    @Column(name = "transfer_id", unique = true, nullable = false, length = 255)
+    private String transferId;
+    
+    @Column(name = "transaction_id", unique = true, nullable = false, length = 255)
     private String transactionId;
     
     @Column(name = "bank_transaction_id")
     private String bankTransactionId; // 외부 은행 시스템의 거래 ID
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_user_id", nullable = false) // sender_id -> sender_user_id
+    @JoinColumn(name = "from_user_id", nullable = false) // V1 스키마와 일치
     private User sender; // Member -> User
     
-    @Column(name = "sender_account_number", nullable = false)
+    @Column(name = "sender_account_number", nullable = false, length = 255)
     private String senderAccountNumber;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_user_id", nullable = false)
+    @JoinColumn(name = "to_user_id", nullable = false) // V1 스키마와 일치
     private User receiver; // Member -> User
     
-    @Column(name = "receiver_account_number", nullable = false)
+    @Column(name = "receiver_account_number", nullable = false, length = 255)
     private String receiverAccountNumber;
     
     @Column(name = "amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
     
-    @Column(name = "memo")
-    private String memo;
+    @Column(name = "description", columnDefinition = "TEXT") // memo -> description으로 변경
+    private String description;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -57,7 +60,7 @@ public class Transfer extends BaseEntity {
     @Column(name = "processed_at")
     private LocalDateTime processedAt;
     
-    @Column(name = "failed_reason")
+    @Column(name = "failed_reason", columnDefinition = "TEXT")
     private String failedReason;
     
     public void markAsProcessing() {
