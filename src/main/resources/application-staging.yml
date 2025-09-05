@@ -105,12 +105,12 @@ management:
       prometheus:
         enabled: true
 
-  # 캐시 설정 (Redis 비활성화로 인해 주석 처리)
-  # cache:
-  #   type: redis
-  #   redis:
-  #     time-to-live: 600000 # 10분
-  #     cache-null-values: false
+# 캐시 설정 (Redis 비활성화로 인해 주석 처리)
+# cache:
+#   type: redis
+#   redis:
+#     time-to-live: 600000 # 10분
+#     cache-null-values: false
 
 # 보안 설정
 security:
