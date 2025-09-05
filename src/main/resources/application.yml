@@ -1,12 +1,10 @@
 spring:
   application:
     name: easypay
-  profiles:
-    active: dev
   
   # PostgreSQL 설정 (환경변수에서 주입)
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/easypay}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/easypay?sslmode=disable}
     driver-class-name: org.postgresql.Driver
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:password}
