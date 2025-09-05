@@ -1,6 +1,8 @@
 spring:
   application:
     name: easypay
+  profiles:
+    active: prod
   
   # PostgreSQL 설정 (환경변수에서 주입)
   datasource:
@@ -29,6 +31,11 @@ spring:
         order_inserts: true
         order_updates: true
         batch_versioned_data: true
+  
+  # Flyway 설정
+  flyway:
+    baseline-on-migrate: true
+    locations: classpath:db/migration
   
   # Redis 설정 (세션 저장소)
   data:
