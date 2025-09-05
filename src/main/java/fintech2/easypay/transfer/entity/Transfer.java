@@ -49,8 +49,8 @@ public class Transfer extends BaseEntity {
     @Column(name = "amount", nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
     
-    @Column(name = "description", columnDefinition = "TEXT") // memo -> description으로 변경
-    private String description;
+    @Column(name = "memo", columnDefinition = "TEXT")
+    private String memo;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
