@@ -1,8 +1,6 @@
 spring:
   application:
     name: easypay
-  profiles:
-    active: prod
   
   # PostgreSQL 설정 (환경변수에서 주입)
   datasource:
