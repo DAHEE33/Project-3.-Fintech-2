@@ -1,6 +1,6 @@
 -- 사용자 계좌 테이블 (다중 계좌 지원)
 CREATE TABLE user_accounts (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     account_number VARCHAR(20) NOT NULL UNIQUE,
     account_name VARCHAR(50) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE user_accounts (
 
 -- 외부 계좌 테이블
 CREATE TABLE external_accounts (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     account_number VARCHAR(50) NOT NULL,
     bank_code VARCHAR(10) NOT NULL,
